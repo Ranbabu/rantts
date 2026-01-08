@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Indian News Image Generator HD+</title>
+<title>Indian News Image Generator HD</title>
 
 <style>
-*{box-sizing:border-box;font-family:system-ui}
+*{box-sizing:border-box;font-family:system-ui,-apple-system}
 body{
   margin:0;
   background:#020617;
@@ -20,6 +20,7 @@ body{
 h1{
   text-align:center;
   font-size:22px;
+  margin-bottom:12px;
 }
 input{
   width:100%;
@@ -28,6 +29,7 @@ input{
   border:1px solid #334155;
   background:#020617;
   color:#fff;
+  font-size:15px;
 }
 button{
   width:100%;
@@ -40,9 +42,6 @@ button{
   font-size:16px;
   cursor:pointer;
   transition:.25s;
-}
-button:disabled{
-  opacity:.6;
 }
 button:active{
   transform:scale(.96);
@@ -81,7 +80,7 @@ button:active{
   inset:0;
   width:100%;
   height:100%;
-  object-fit:contain;
+  object-fit:contain; /* 🔥 FACE SAFE */
   z-index:1;
 }
 .download{
@@ -91,141 +90,137 @@ button:active{
   border-color:#22c55e;
   color:#22c55e;
 }
-.timer{
-  text-align:center;
-  margin-top:10px;
-  font-size:14px;
-  opacity:.8;
-}
 .footer{
   text-align:center;
   font-size:12px;
   opacity:.6;
   margin:16px 0 6px;
 }
+.loader{
+  text-align:center;
+  margin-top:10px;
+  display:none;
+}
 </style>
 </head>
 
 <body>
 <div class="app">
-<h1>📰 Indian News Image Generator (HD+)</h1>
+  <h1>📰 Indian News Image Generator (HD)</h1>
 
-<input id="query" placeholder="Example: Nitin Nabin BJP national news">
+  <input id="query" placeholder="Example: Nitin Nabin BJP national news">
 
-<button id="genBtn" onclick="startTimer()">Generate Images</button>
-<div class="timer" id="timer"></div>
+  <button onclick="generateImages()">Generate Images</button>
 
-<div class="grid" id="grid"></div>
+  <div class="loader" id="loader">🔄 Images loading...</div>
 
-<div class="footer">
-Face Safe • 16:9 • Enhance → Download HD
-</div>
+  <div class="grid" id="grid"></div>
+
+  <div class="footer">
+    Google Image Based • Face Safe • 16:9 • HD Boost
+  </div>
 </div>
 
 <script>
-let countdown = 5;
-
-function startTimer(){
-  const q = query.value.trim();
-  if(!q) return alert("Keyword डालें");
-
-  genBtn.disabled = true;
-  timer.textContent = "Processing... 5s";
-
-  countdown = 5;
-  const t = setInterval(()=>{
-    countdown--;
-    timer.textContent = "Processing... " + countdown + "s";
-
-    if(countdown===0){
-      clearInterval(t);
-      timer.textContent = "";
-      generateImages();
-      genBtn.disabled = false;
-    }
-  },1000);
-}
-
 function generateImages(){
-  grid.innerHTML="";
+  const q = document.getElementById("query").value.trim();
+  if(!q){
+    alert("Headline / keyword डालें");
+    return;
+  }
 
-  const search = encodeURIComponent(query.value + " India news");
+  grid.innerHTML="";
+  loader.style.display="block";
+
+  const search = encodeURIComponent(q + " India news");
   const url = `https://www.google.com/search?tbm=isch&tbs=isz:l&q=${search}`;
 
   fetch("https://api.allorigins.win/raw?url="+encodeURIComponent(url))
-  .then(r=>r.text())
-  .then(html=>{
-    const doc = new DOMParser().parseFromString(html,"text/html");
-    const imgs=[...doc.querySelectorAll("img")]
-      .map(i=>i.src)
-      .filter(s=>s.startsWith("http"))
-      .slice(2,14);
+    .then(r=>r.text())
+    .then(html=>{
+      const doc = new DOMParser().parseFromString(html,"text/html");
+      const imgs = [...doc.querySelectorAll("img")]
+        .map(i=>i.src)
+        .filter(s=>s.startsWith("http"))
+        .slice(2,14); // 12 images
 
-    imgs.forEach(src=>{
-      const card=document.createElement("div");
-      card.className="card";
+      if(imgs.length===0){
+        alert("Images नहीं मिली, keyword बदलें");
+        return;
+      }
 
-      const frame=document.createElement("div");
-      frame.className="frame";
-      frame.style.setProperty("--bg",`url(${src})`);
+      imgs.forEach(src=>{
+        const card = document.createElement("div");
+        card.className="card";
 
-      const img=document.createElement("img");
-      img.crossOrigin="anonymous";
-      img.src=src;
+        const frame = document.createElement("div");
+        frame.className="frame";
+        frame.style.setProperty("--bg",`url(${src})`);
 
-      frame.appendChild(img);
+        const img = document.createElement("img");
+        img.crossOrigin="anonymous";
+        img.src = src;
 
-      const down=document.createElement("div");
-      down.className="download";
+        frame.appendChild(img);
 
-      const btn=document.createElement("button");
-      btn.textContent="⬇ Enhance & Download HD";
-      btn.onclick=()=>enhanceAndDownload(img);
+        const down = document.createElement("div");
+        down.className="download";
 
-      down.appendChild(btn);
-      card.append(frame,down);
-      grid.appendChild(card);
+        const btn = document.createElement("button");
+        btn.textContent = "⬇ Download HD 16:9 Image";
+        btn.onclick = ()=>downloadHD(img);
+
+        down.appendChild(btn);
+
+        card.append(frame,down);
+        grid.appendChild(card);
+      });
+    })
+    .catch(()=>{
+      alert("Local file block ho sakta hai — hosting par upload karein");
+    })
+    .finally(()=>{
+      loader.style.display="none";
     });
-  })
-  .catch(()=>alert("Hosting पर upload करके चलाएँ"));
 }
 
-function enhanceAndDownload(img){
-  const canvas=document.createElement("canvas");
-  canvas.width=1920;
-  canvas.height=1080;
+function downloadHD(img){
+  const canvas = document.createElement("canvas");
+  canvas.width = 1280;
+  canvas.height = 720;
 
-  const ctx=canvas.getContext("2d");
-  ctx.imageSmoothingEnabled=true;
-  ctx.imageSmoothingQuality="high";
+  const ctx = canvas.getContext("2d");
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = "high";
 
-  ctx.fillStyle="#000";
+  // background
+  ctx.fillStyle = "#000";
   ctx.fillRect(0,0,canvas.width,canvas.height);
 
-  const ratio=Math.min(
-    canvas.width/img.naturalWidth,
-    canvas.height/img.naturalHeight
+  // scale
+  const ratio = Math.min(
+    canvas.width / img.naturalWidth,
+    canvas.height / img.naturalHeight
   );
 
-  const w=img.naturalWidth*ratio;
-  const h=img.naturalHeight*ratio;
-  const x=(canvas.width-w)/2;
-  const y=(canvas.height-h)/2;
+  const w = img.naturalWidth * ratio;
+  const h = img.naturalHeight * ratio;
+  const x = (canvas.width - w) / 2;
+  const y = (canvas.height - h) / 2;
 
-  // draw base
-  ctx.drawImage(img,x,y,w,h);
+  ctx.drawImage(img, x, y, w, h);
 
-  // clarity & sharpen
-  ctx.globalAlpha=0.25;
-  ctx.drawImage(canvas,-1,0);
-  ctx.drawImage(canvas,1,0);
-  ctx.drawImage(canvas,0,-1);
-  ctx.drawImage(canvas,0,1);
-  ctx.globalAlpha=1;
+  // light sharpening
+  ctx.globalAlpha = 0.18;
+  ctx.drawImage(canvas, -1, 0);
+  ctx.drawImage(canvas, 1, 0);
+  ctx.drawImage(canvas, 0, -1);
+  ctx.drawImage(canvas, 0, 1);
+  ctx.globalAlpha = 1;
 
-  const a=document.createElement("a");
-  a.download="news-image-HD-enhanced.jpg";
-  a.href=canvas.toDataURL("image/jpeg",0.98);
+  const a = document.createElement("a");
+  a.download = "news-image-16x9-HD.jpg";
+  a.href = canvas.toDataURL("image/jpeg", 0.98);
   a.click();
 }
 </script>
