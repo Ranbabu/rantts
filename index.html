@@ -22,6 +22,13 @@ h1{
   font-size:22px;
   margin-bottom:12px;
 }
+/* Controls Wrapper */
+.controls {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
 input{
   width:100%;
   padding:14px;
@@ -31,9 +38,22 @@ input{
   color:#fff;
   font-size:15px;
 }
+
+/* New Dropdown Style */
+select {
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px solid #334155;
+  background: #1e293b;
+  color: #fff;
+  font-size: 15px;
+  outline: none;
+  cursor: pointer;
+  flex-shrink: 0; /* Prevent shrinking */
+}
+
 button{
   width:100%;
-  margin-top:12px;
   padding:14px;
   border-radius:16px;
   border:2px solid #38bdf8;
@@ -42,6 +62,7 @@ button{
   font-size:16px;
   cursor:pointer;
   transition:.25s;
+  font-weight: 600;
 }
 button:active{
   transform:scale(.96);
@@ -80,15 +101,17 @@ button:active{
   inset:0;
   width:100%;
   height:100%;
-  object-fit:contain; /* 🔥 FACE SAFE */
+  object-fit:contain; 
   z-index:1;
 }
 .download{
   padding:10px;
+  background: #0f172a;
 }
 .download button{
   border-color:#22c55e;
   color:#22c55e;
+  margin-top: 0; /* Override previous margin */
 }
 .footer{
   text-align:center;
@@ -100,128 +123,203 @@ button:active{
   text-align:center;
   margin-top:10px;
   display:none;
+  color: #38bdf8;
 }
 </style>
 </head>
 
 <body>
 <div class="app">
-  <h1>📰 Indian News Image Generator (HD)</h1>
+  <h1>📰 Indian News Image Generator</h1>
 
-  <input id="query" placeholder="Example: Nitin Nabin BJP national news">
+  <div class="controls">
+    <select id="qualitySelect">
+      <option value="hd">HD (720p)</option>
+      <option value="fhd" selected>Full HD (1080p)</option>
+      <option value="4k">4K Ultra (2160p)</option>
+    </select>
+  </div>
 
-  <button onclick="generateImages()">Generate Images</button>
+  <input id="query" placeholder="Headline paste karein...">
 
-  <div class="loader" id="loader">🔄 Images loading...</div>
+  <button onclick="startSearch()" style="margin-top: 10px;">🔍 Generate Images</button>
+
+  <div class="loader" id="loader">🔄 High Quality Images Search ho rahi hain...</div>
 
   <div class="grid" id="grid"></div>
 
   <div class="footer">
-    Google Image Based • Face Safe • 16:9 • HD Boost
+    Google Image Based • Face Safe • 16:9 • AI Upscale
   </div>
 </div>
 
 <script>
-function generateImages(){
+// Main function to start
+function startSearch() {
   const q = document.getElementById("query").value.trim();
   if(!q){
-    alert("Headline / keyword डालें");
+    alert("Please enter a headline!");
     return;
   }
 
-  grid.innerHTML="";
-  loader.style.display="block";
+  const grid = document.getElementById("grid");
+  const loader = document.getElementById("loader");
+  
+  grid.innerHTML = "";
+  loader.style.display = "block";
+  loader.textContent = "🔄 Searching High Res Images...";
 
-  const search = encodeURIComponent(q + " India news");
-  const url = `https://www.google.com/search?tbm=isch&tbs=isz:l&q=${search}`;
+  // SMART QUERY: Sirf shuru ke 10-12 words lein taaki error na aaye
+  const cleanQuery = q.split(" ").slice(0, 12).join(" ");
+  
+  setTimeout(() => {
+     fetchImages(cleanQuery, 0); 
+  }, 1000);
+}
 
-  fetch("https://api.allorigins.win/raw?url="+encodeURIComponent(url))
-    .then(r=>r.text())
-    .then(html=>{
-      const doc = new DOMParser().parseFromString(html,"text/html");
+// Function to fetch images with Retry Logic
+function fetchImages(query, attempt) {
+  const loader = document.getElementById("loader");
+  
+  // Google Images URL (forcing large images with tbs=isz:l)
+  const search = encodeURIComponent(query + " India news");
+  const googleUrl = `https://www.google.com/search?tbm=isch&tbs=isz:l&q=${search}`;
+  
+  const proxyUrl = "https://api.allorigins.win/raw?url=" + encodeURIComponent(googleUrl);
+
+  fetch(proxyUrl)
+    .then(r => {
+      if (!r.ok) throw new Error("Network issue");
+      return r.text();
+    })
+    .then(html => {
+      const doc = new DOMParser().parseFromString(html, "text/html");
       const imgs = [...doc.querySelectorAll("img")]
-        .map(i=>i.src)
-        .filter(s=>s.startsWith("http"))
-        .slice(2,14); // 12 images
+        .map(i => i.src)
+        .filter(s => s.startsWith("http"))
+        .slice(1, 15);
 
-      if(imgs.length===0){
-        alert("Images नहीं मिली, keyword बदलें");
-        return;
+      if (imgs.length <= 1) {
+        throw new Error("No images found");
       }
 
-      imgs.forEach(src=>{
-        const card = document.createElement("div");
-        card.className="card";
-
-        const frame = document.createElement("div");
-        frame.className="frame";
-        frame.style.setProperty("--bg",`url(${src})`);
-
-        const img = document.createElement("img");
-        img.crossOrigin="anonymous";
-        img.src = src;
-
-        frame.appendChild(img);
-
-        const down = document.createElement("div");
-        down.className="download";
-
-        const btn = document.createElement("button");
-        btn.textContent = "⬇ Download HD 16:9 Image";
-        btn.onclick = ()=>downloadHD(img);
-
-        down.appendChild(btn);
-
-        card.append(frame,down);
-        grid.appendChild(card);
-      });
+      renderImages(imgs);
+      loader.style.display = "none";
     })
-    .catch(()=>{
-      alert("Local file block ho sakta hai — hosting par upload karein");
-    })
-    .finally(()=>{
-      loader.style.display="none";
+    .catch(err => {
+      console.log("Retry attempt: " + (attempt + 1));
+      if (attempt < 1) {
+        loader.textContent = "⚠️ Retrying for better quality...";
+        setTimeout(() => {
+          fetchImages(query, attempt + 1);
+        }, 2000);
+      } else {
+        loader.style.display = "none";
+        alert("Image nahi mili. Headline chhota karke try karein.");
+      }
     });
 }
 
-function downloadHD(img){
+function renderImages(imgs) {
+  const grid = document.getElementById("grid");
+  
+  imgs.forEach(src => {
+    // Filter out very small icons
+    if(src.includes("gif") || src.length < 50) return;
+
+    const card = document.createElement("div");
+    card.className = "card";
+
+    const frame = document.createElement("div");
+    frame.className = "frame";
+    frame.style.setProperty("--bg", `url(${src})`);
+
+    const img = document.createElement("img");
+    img.crossOrigin = "anonymous";
+    img.src = src;
+    
+    img.onerror = function() {
+        card.style.display = "none"; 
+    };
+
+    frame.appendChild(img);
+
+    const down = document.createElement("div");
+    down.className = "download";
+
+    const btn = document.createElement("button");
+    btn.innerHTML = "⬇ Download <b>High Quality</b>";
+    btn.onclick = () => downloadHD(img);
+
+    down.appendChild(btn);
+
+    card.append(frame, down);
+    grid.appendChild(card);
+  });
+}
+
+function downloadHD(img) {
+  // Check selected quality
+  const quality = document.getElementById("qualitySelect").value;
   const canvas = document.createElement("canvas");
-  canvas.width = 1280;
-  canvas.height = 720;
-
   const ctx = canvas.getContext("2d");
-  ctx.imageSmoothingEnabled = true;
-  ctx.imageSmoothingQuality = "high";
 
-  // background
+  // Resolution Logic
+  let w, h, fileName;
+  
+  if (quality === '4k') {
+      w = 3840; h = 2160; // 4K Ultra HD
+      fileName = "News-Image-4K-Ultra.jpg";
+      ctx.imageSmoothingQuality = "high";
+  } else if (quality === 'fhd') {
+      w = 1920; h = 1080; // Full HD
+      fileName = "News-Image-1080p.jpg";
+      ctx.imageSmoothingQuality = "medium";
+  } else {
+      w = 1280; h = 720; // Standard HD
+      fileName = "News-Image-720p.jpg";
+      ctx.imageSmoothingQuality = "medium";
+  }
+
+  canvas.width = w;
+  canvas.height = h;
+
+  // Background Black
   ctx.fillStyle = "#000";
-  ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  // scale
+  // Smart Scaling
   const ratio = Math.min(
     canvas.width / img.naturalWidth,
     canvas.height / img.naturalHeight
   );
 
-  const w = img.naturalWidth * ratio;
-  const h = img.naturalHeight * ratio;
-  const x = (canvas.width - w) / 2;
-  const y = (canvas.height - h) / 2;
+  const newW = img.naturalWidth * ratio;
+  const newH = img.naturalHeight * ratio;
+  const x = (canvas.width - newW) / 2;
+  const y = (canvas.height - newH) / 2;
 
-  ctx.drawImage(img, x, y, w, h);
+  try {
+      ctx.drawImage(img, x, y, newW, newH);
 
-  // light sharpening
-  ctx.globalAlpha = 0.18;
-  ctx.drawImage(canvas, -1, 0);
-  ctx.drawImage(canvas, 1, 0);
-  ctx.drawImage(canvas, 0, -1);
-  ctx.drawImage(canvas, 0, 1);
-  ctx.globalAlpha = 1;
+      // --- SHARPENING EFFECT (To improve quality) ---
+      // Agar 4K ya Full HD hai to thoda sharpen karein
+      if(quality === '4k' || quality === 'fhd'){
+          ctx.globalAlpha = 0.2; // Sharpening intensity
+          ctx.drawImage(canvas, -1, 0); // Shift Left
+          ctx.drawImage(canvas, 1, 0);  // Shift Right
+          ctx.drawImage(canvas, 0, -1); // Shift Up
+          ctx.drawImage(canvas, 0, 1);  // Shift Down
+          ctx.globalAlpha = 1;
+      }
 
-  const a = document.createElement("a");
-  a.download = "news-image-16x9-HD.jpg";
-  a.href = canvas.toDataURL("image/jpeg", 0.98);
-  a.click();
+      const a = document.createElement("a");
+      a.download = fileName;
+      a.href = canvas.toDataURL("image/jpeg", 0.95); // 95% Quality JPEG
+      a.click();
+  } catch(e) {
+      alert("Error: Security reason se image save nahi ho rahi. Screenshot le lijiye.");
+  }
 }
 </script>
 </body>
