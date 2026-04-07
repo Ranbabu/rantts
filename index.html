@@ -29,7 +29,7 @@
     <main id="chat-container" class="flex-1 overflow-y-auto p-4 space-y-4 pb-20">
         <div class="flex justify-start message-enter">
             <div class="bg-white border border-gray-200 text-gray-800 rounded-2xl rounded-tl-sm px-4 py-2 max-w-[85%] shadow-sm">
-                नमस्ते! मैं आपका AI असिस्टेंट हूँ। कृपया सेटिंग्स (⚙️) में जाकर अपनी OpenRouter API Key और Model सेट करें।
+                नमस्ते! मैं आपका AI असिस्टेंट हूँ। कृपया सेटिंग्स (⚙️) में जाकर बस अपनी OpenRouter API Key डालें। मॉडल पहले से ही बेस्ट फ्री सर्वर पर सेट है।
             </div>
         </div>
     </main>
@@ -64,8 +64,8 @@
                 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Model ID</label>
-                    <input type="text" id="model-id" placeholder="deepseek/deepseek-r1:free" value="deepseek/deepseek-r1:free" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
-                    <p class="text-xs text-gray-500 mt-1">Default: deepseek/deepseek-r1:free</p>
+                    <input type="text" id="model-id" placeholder="openrouter/free" value="openrouter/free" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-gray-50">
+                    <p class="text-xs text-green-600 mt-1 font-medium"><i class="fa-solid fa-check-circle"></i> Default: openrouter/free (ऑटो-राउटर, कभी फेल नहीं होगा)</p>
                 </div>
 
                 <div>
@@ -103,7 +103,8 @@
         // Load Settings from LocalStorage on load
         window.addEventListener('DOMContentLoaded', () => {
             apiKeyInput.value = localStorage.getItem('or_api_key') || '';
-            modelIdInput.value = localStorage.getItem('or_model_id') || 'deepseek/deepseek-r1:free';
+            // मॉडल अब हमेशा डिफ़ॉल्ट रूप से 'openrouter/free' रहेगा 
+            modelIdInput.value = localStorage.getItem('or_model_id') || 'openrouter/free';
             systemPromptInput.value = localStorage.getItem('or_system_prompt') || 'You are a helpful AI assistant.';
             
             // Set initial system prompt in history
@@ -147,7 +148,12 @@
             }
             
             closeModal();
-            alert('Settings Saved!');
+            // Settings save होने पर एक छोटा मैसेज 
+            const Toast = document.createElement('div');
+            Toast.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded shadow-lg transition-opacity duration-300';
+            Toast.innerText = 'Settings Saved!';
+            document.body.appendChild(Toast);
+            setTimeout(() => { Toast.style.opacity = '0'; setTimeout(() => Toast.remove(), 300); }, 2000);
         });
 
         // Append Message to UI
@@ -210,7 +216,7 @@
             // Add to history
             chatHistory.push({ role: "user", content: message });
 
-            const modelId = localStorage.getItem('or_model_id') || 'deepseek/deepseek-r1:free';
+            const modelId = localStorage.getItem('or_model_id') || 'openrouter/free';
 
             try {
                 const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
@@ -218,7 +224,7 @@
                     headers: {
                         "Authorization": `Bearer ${apiKey}`,
                         "HTTP-Referer": window.location.href, // Required by OpenRouter
-                        "X-Title": "My Local AI Chat", // Optional
+                        "X-Title": "My AI Studio", // Optional
                         "Content-Type": "application/json"
                     },
                     body: JSON.stringify({
