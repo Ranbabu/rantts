@@ -1,326 +1,251 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Indian News Image Generator HD</title>
-
-<style>
-*{box-sizing:border-box;font-family:system-ui,-apple-system}
-body{
-  margin:0;
-  background:#020617;
-  color:#e5e7eb;
-}
-.app{
-  max-width:560px;
-  margin:auto;
-  padding:14px;
-}
-h1{
-  text-align:center;
-  font-size:22px;
-  margin-bottom:12px;
-}
-/* Controls Wrapper */
-.controls {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 12px;
-}
-
-input{
-  width:100%;
-  padding:14px;
-  border-radius:14px;
-  border:1px solid #334155;
-  background:#020617;
-  color:#fff;
-  font-size:15px;
-}
-
-/* New Dropdown Style */
-select {
-  padding: 14px;
-  border-radius: 14px;
-  border: 1px solid #334155;
-  background: #1e293b;
-  color: #fff;
-  font-size: 15px;
-  outline: none;
-  cursor: pointer;
-  flex-shrink: 0; /* Prevent shrinking */
-}
-
-button{
-  width:100%;
-  padding:14px;
-  border-radius:16px;
-  border:2px solid #38bdf8;
-  background:transparent;
-  color:#38bdf8;
-  font-size:16px;
-  cursor:pointer;
-  transition:.25s;
-  font-weight: 600;
-}
-button:active{
-  transform:scale(.96);
-  background:#38bdf8;
-  color:#020617;
-}
-.grid{
-  display:grid;
-  gap:16px;
-  margin-top:16px;
-}
-.card{
-  border-radius:16px;
-  overflow:hidden;
-  border:1px solid #1e293b;
-}
-.frame{
-  position:relative;
-  width:100%;
-  aspect-ratio:16/9;
-  background:#000;
-  overflow:hidden;
-}
-.frame::before{
-  content:"";
-  position:absolute;
-  inset:0;
-  background-image:var(--bg);
-  background-size:cover;
-  background-position:center;
-  filter:blur(22px) brightness(.7);
-  transform:scale(1.15);
-}
-.frame img{
-  position:absolute;
-  inset:0;
-  width:100%;
-  height:100%;
-  object-fit:contain; 
-  z-index:1;
-}
-.download{
-  padding:10px;
-  background: #0f172a;
-}
-.download button{
-  border-color:#22c55e;
-  color:#22c55e;
-  margin-top: 0; /* Override previous margin */
-}
-.footer{
-  text-align:center;
-  font-size:12px;
-  opacity:.6;
-  margin:16px 0 6px;
-}
-.loader{
-  text-align:center;
-  margin-top:10px;
-  display:none;
-  color: #38bdf8;
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AI Chatbot (OpenRouter)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Custom scrollbar for chat area */
+        #chat-container::-webkit-scrollbar { width: 6px; }
+        #chat-container::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .message-enter { animation: fadeIn 0.3s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
 </head>
+<body class="bg-gray-50 h-screen flex flex-col font-sans text-gray-800">
 
-<body>
-<div class="app">
-  <h1>📰 Indian News Image Generator</h1>
+    <header class="bg-white shadow-sm px-4 py-3 flex justify-between items-center z-10 relative">
+        <div class="flex items-center gap-2">
+            <i class="fa-solid fa-robot text-blue-600 text-xl"></i>
+            <h1 class="text-lg font-semibold text-gray-800">AI Chat</h1>
+        </div>
+        <button id="settings-btn" class="p-2 text-gray-500 hover:text-blue-600 focus:outline-none transition-colors">
+            <i class="fa-solid fa-sliders text-xl"></i>
+        </button>
+    </header>
 
-  <div class="controls">
-    <select id="qualitySelect">
-      <option value="hd">HD (720p)</option>
-      <option value="fhd" selected>Full HD (1080p)</option>
-      <option value="4k">4K Ultra (2160p)</option>
-    </select>
-  </div>
+    <main id="chat-container" class="flex-1 overflow-y-auto p-4 space-y-4 pb-20">
+        <div class="flex justify-start message-enter">
+            <div class="bg-white border border-gray-200 text-gray-800 rounded-2xl rounded-tl-sm px-4 py-2 max-w-[85%] shadow-sm">
+                नमस्ते! मैं आपका AI असिस्टेंट हूँ। कृपया सेटिंग्स (⚙️) में जाकर अपनी OpenRouter API Key और Model सेट करें।
+            </div>
+        </div>
+    </main>
 
-  <input id="query" placeholder="Headline paste karein...">
+    <footer class="bg-white border-t border-gray-200 p-3 sticky bottom-0">
+        <form id="chat-form" class="flex gap-2 items-end max-w-3xl mx-auto">
+            <div class="flex-1 bg-gray-100 rounded-2xl px-4 py-2 border border-gray-200 focus-within:border-blue-400 focus-within:ring-1 focus-within:ring-blue-400 transition-all">
+                <textarea id="user-input" rows="1" class="w-full bg-transparent outline-none resize-none max-h-32 text-gray-800" placeholder="Message AI..." required></textarea>
+            </div>
+            <button type="submit" id="send-btn" class="bg-blue-600 text-white rounded-full w-10 h-10 flex items-center justify-center hover:bg-blue-700 transition-colors flex-shrink-0">
+                <i class="fa-solid fa-paper-plane"></i>
+            </button>
+        </form>
+    </footer>
 
-  <button onclick="startSearch()" style="margin-top: 10px;">🔍 Generate Images</button>
+    <div id="settings-modal" class="fixed inset-0 bg-black/50 hidden z-50 flex items-center justify-center p-4 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-2xl w-full max-w-md shadow-xl overflow-hidden animate-[fadeIn_0.2s_ease-out]">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+                <h2 class="text-xl font-semibold flex items-center gap-2">
+                    <i class="fa-solid fa-sliders text-blue-500"></i> Settings
+                </h2>
+                <button id="close-modal-btn" class="text-gray-400 hover:text-gray-600">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            
+            <div class="p-6 space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">OpenRouter API Key</label>
+                    <input type="password" id="api-key" placeholder="sk-or-..." class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Model ID</label>
+                    <input type="text" id="model-id" placeholder="deepseek/deepseek-r1:free" value="deepseek/deepseek-r1:free" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                    <p class="text-xs text-gray-500 mt-1">Default: deepseek/deepseek-r1:free</p>
+                </div>
 
-  <div class="loader" id="loader">🔄 High Quality Images Search ho rahi hain...</div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">System Prompt</label>
+                    <textarea id="system-prompt" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">You are a helpful AI assistant.</textarea>
+                </div>
+            </div>
 
-  <div class="grid" id="grid"></div>
+            <div class="px-6 py-4 bg-gray-50 flex justify-end gap-3 rounded-b-2xl">
+                <button id="cancel-btn" class="px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-lg font-medium transition-colors">Cancel</button>
+                <button id="save-btn" class="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors shadow-sm">Save Changes</button>
+            </div>
+        </div>
+    </div>
 
-  <div class="footer">
-    Google Image Based • Face Safe • 16:9 • AI Upscale
-  </div>
-</div>
+    <script>
+        // DOM Elements
+        const chatContainer = document.getElementById('chat-container');
+        const chatForm = document.getElementById('chat-form');
+        const userInput = document.getElementById('user-input');
+        const settingsBtn = document.getElementById('settings-btn');
+        const settingsModal = document.getElementById('settings-modal');
+        const closeModalBtn = document.getElementById('close-modal-btn');
+        const cancelBtn = document.getElementById('cancel-btn');
+        const saveBtn = document.getElementById('save-btn');
+        
+        // Setting Inputs
+        const apiKeyInput = document.getElementById('api-key');
+        const modelIdInput = document.getElementById('model-id');
+        const systemPromptInput = document.getElementById('system-prompt');
 
-<script>
-// Main function to start
-function startSearch() {
-  const q = document.getElementById("query").value.trim();
-  if(!q){
-    alert("Please enter a headline!");
-    return;
-  }
+        // Chat History Array
+        let chatHistory = [];
 
-  const grid = document.getElementById("grid");
-  const loader = document.getElementById("loader");
-  
-  grid.innerHTML = "";
-  loader.style.display = "block";
-  loader.textContent = "🔄 Searching High Res Images...";
+        // Load Settings from LocalStorage on load
+        window.addEventListener('DOMContentLoaded', () => {
+            apiKeyInput.value = localStorage.getItem('or_api_key') || '';
+            modelIdInput.value = localStorage.getItem('or_model_id') || 'deepseek/deepseek-r1:free';
+            systemPromptInput.value = localStorage.getItem('or_system_prompt') || 'You are a helpful AI assistant.';
+            
+            // Set initial system prompt in history
+            chatHistory.push({ role: "system", content: systemPromptInput.value });
+        });
 
-  // SMART QUERY: Sirf shuru ke 10-12 words lein taaki error na aaye
-  const cleanQuery = q.split(" ").slice(0, 12).join(" ");
-  
-  setTimeout(() => {
-     fetchImages(cleanQuery, 0); 
-  }, 1000);
-}
+        // Auto-resize textarea
+        userInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+            if(this.value === '') this.style.height = 'auto';
+        });
 
-// Function to fetch images with Retry Logic
-function fetchImages(query, attempt) {
-  const loader = document.getElementById("loader");
-  
-  // Google Images URL (forcing large images with tbs=isz:l)
-  const search = encodeURIComponent(query + " India news");
-  const googleUrl = `https://www.google.com/search?tbm=isch&tbs=isz:l&q=${search}`;
-  
-  const proxyUrl = "https://api.allorigins.win/raw?url=" + encodeURIComponent(googleUrl);
+        // Enter key to send (Shift+Enter for new line)
+        userInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                chatForm.dispatchEvent(new Event('submit'));
+            }
+        });
 
-  fetch(proxyUrl)
-    .then(r => {
-      if (!r.ok) throw new Error("Network issue");
-      return r.text();
-    })
-    .then(html => {
-      const doc = new DOMParser().parseFromString(html, "text/html");
-      const imgs = [...doc.querySelectorAll("img")]
-        .map(i => i.src)
-        .filter(s => s.startsWith("http"))
-        .slice(1, 15);
+        // Modal Logic
+        const openModal = () => settingsModal.classList.remove('hidden');
+        const closeModal = () => settingsModal.classList.add('hidden');
 
-      if (imgs.length <= 1) {
-        throw new Error("No images found");
-      }
+        settingsBtn.addEventListener('click', openModal);
+        closeModalBtn.addEventListener('click', closeModal);
+        cancelBtn.addEventListener('click', closeModal);
 
-      renderImages(imgs);
-      loader.style.display = "none";
-    })
-    .catch(err => {
-      console.log("Retry attempt: " + (attempt + 1));
-      if (attempt < 1) {
-        loader.textContent = "⚠️ Retrying for better quality...";
-        setTimeout(() => {
-          fetchImages(query, attempt + 1);
-        }, 2000);
-      } else {
-        loader.style.display = "none";
-        alert("Image nahi mili. Headline chhota karke try karein.");
-      }
-    });
-}
+        // Save Settings
+        saveBtn.addEventListener('click', () => {
+            localStorage.setItem('or_api_key', apiKeyInput.value.trim());
+            localStorage.setItem('or_model_id', modelIdInput.value.trim());
+            localStorage.setItem('or_system_prompt', systemPromptInput.value.trim());
+            
+            // Update system prompt in history
+            if(chatHistory.length > 0 && chatHistory[0].role === 'system') {
+                chatHistory[0].content = systemPromptInput.value.trim();
+            } else {
+                chatHistory.unshift({ role: "system", content: systemPromptInput.value.trim() });
+            }
+            
+            closeModal();
+            alert('Settings Saved!');
+        });
 
-function renderImages(imgs) {
-  const grid = document.getElementById("grid");
-  
-  imgs.forEach(src => {
-    // Filter out very small icons
-    if(src.includes("gif") || src.length < 50) return;
+        // Append Message to UI
+        function appendMessage(role, text) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `flex ${role === 'user' ? 'justify-end' : 'justify-start'} message-enter`;
+            
+            const innerDiv = document.createElement('div');
+            if (role === 'user') {
+                innerDiv.className = 'bg-blue-600 text-white rounded-2xl rounded-tr-sm px-4 py-2 max-w-[85%] shadow-sm whitespace-pre-wrap';
+            } else {
+                innerDiv.className = 'bg-white border border-gray-200 text-gray-800 rounded-2xl rounded-tl-sm px-4 py-2 max-w-[85%] shadow-sm whitespace-pre-wrap';
+            }
+            
+            innerDiv.textContent = text;
+            msgDiv.appendChild(innerDiv);
+            chatContainer.appendChild(msgDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
 
-    const card = document.createElement("div");
-    card.className = "card";
+        // Add loading indicator
+        function addLoader() {
+            const loaderDiv = document.createElement('div');
+            loaderDiv.id = 'loading-indicator';
+            loaderDiv.className = 'flex justify-start message-enter';
+            loaderDiv.innerHTML = `
+                <div class="bg-white border border-gray-200 rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm flex gap-1 items-center">
+                    <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                    <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                    <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.4s"></div>
+                </div>`;
+            chatContainer.appendChild(loaderDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
 
-    const frame = document.createElement("div");
-    frame.className = "frame";
-    frame.style.setProperty("--bg", `url(${src})`);
+        function removeLoader() {
+            const loader = document.getElementById('loading-indicator');
+            if (loader) loader.remove();
+        }
 
-    const img = document.createElement("img");
-    img.crossOrigin = "anonymous";
-    img.src = src;
-    
-    img.onerror = function() {
-        card.style.display = "none"; 
-    };
+        // Handle Chat Submit
+        chatForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const message = userInput.value.trim();
+            if (!message) return;
 
-    frame.appendChild(img);
+            const apiKey = localStorage.getItem('or_api_key');
+            if (!apiKey) {
+                alert("Please add your OpenRouter API Key in Settings first.");
+                openModal();
+                return;
+            }
 
-    const down = document.createElement("div");
-    down.className = "download";
+            // UI Updates for User
+            appendMessage('user', message);
+            userInput.value = '';
+            userInput.style.height = 'auto';
+            addLoader();
 
-    const btn = document.createElement("button");
-    btn.innerHTML = "⬇ Download <b>High Quality</b>";
-    btn.onclick = () => downloadHD(img);
+            // Add to history
+            chatHistory.push({ role: "user", content: message });
 
-    down.appendChild(btn);
+            const modelId = localStorage.getItem('or_model_id') || 'deepseek/deepseek-r1:free';
 
-    card.append(frame, down);
-    grid.appendChild(card);
-  });
-}
+            try {
+                const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Bearer ${apiKey}`,
+                        "HTTP-Referer": window.location.href, // Required by OpenRouter
+                        "X-Title": "My Local AI Chat", // Optional
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        model: modelId,
+                        messages: chatHistory
+                    })
+                });
 
-function downloadHD(img) {
-  // Check selected quality
-  const quality = document.getElementById("qualitySelect").value;
-  const canvas = document.createElement("canvas");
-  const ctx = canvas.getContext("2d");
+                removeLoader();
 
-  // Resolution Logic
-  let w, h, fileName;
-  
-  if (quality === '4k') {
-      w = 3840; h = 2160; // 4K Ultra HD
-      fileName = "News-Image-4K-Ultra.jpg";
-      ctx.imageSmoothingQuality = "high";
-  } else if (quality === 'fhd') {
-      w = 1920; h = 1080; // Full HD
-      fileName = "News-Image-1080p.jpg";
-      ctx.imageSmoothingQuality = "medium";
-  } else {
-      w = 1280; h = 720; // Standard HD
-      fileName = "News-Image-720p.jpg";
-      ctx.imageSmoothingQuality = "medium";
-  }
+                if (!response.ok) {
+                    const err = await response.json();
+                    throw new Error(err.error?.message || 'API Error');
+                }
 
-  canvas.width = w;
-  canvas.height = h;
+                const data = await response.json();
+                const aiMessage = data.choices[0].message.content;
+                
+                appendMessage('ai', aiMessage);
+                chatHistory.push({ role: "assistant", content: aiMessage });
 
-  // Background Black
-  ctx.fillStyle = "#000";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  // Smart Scaling
-  const ratio = Math.min(
-    canvas.width / img.naturalWidth,
-    canvas.height / img.naturalHeight
-  );
-
-  const newW = img.naturalWidth * ratio;
-  const newH = img.naturalHeight * ratio;
-  const x = (canvas.width - newW) / 2;
-  const y = (canvas.height - newH) / 2;
-
-  try {
-      ctx.drawImage(img, x, y, newW, newH);
-
-      // --- SHARPENING EFFECT (To improve quality) ---
-      // Agar 4K ya Full HD hai to thoda sharpen karein
-      if(quality === '4k' || quality === 'fhd'){
-          ctx.globalAlpha = 0.2; // Sharpening intensity
-          ctx.drawImage(canvas, -1, 0); // Shift Left
-          ctx.drawImage(canvas, 1, 0);  // Shift Right
-          ctx.drawImage(canvas, 0, -1); // Shift Up
-          ctx.drawImage(canvas, 0, 1);  // Shift Down
-          ctx.globalAlpha = 1;
-      }
-
-      const a = document.createElement("a");
-      a.download = fileName;
-      a.href = canvas.toDataURL("image/jpeg", 0.95); // 95% Quality JPEG
-      a.click();
-  } catch(e) {
-      alert("Error: Security reason se image save nahi ho rahi. Screenshot le lijiye.");
-  }
-}
-</script>
+            } catch (error) {
+                removeLoader();
+                appendMessage('ai', `❌ Error: ${error.message}`);
+                chatHistory.pop(); // Remove the last user message from history so it doesn't get stuck
+            }
+        });
+    </script>
 </body>
 </html>
