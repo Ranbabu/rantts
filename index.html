@@ -3,75 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Aryan News Tech TTS Pro</title>
+    <title>Gemini TTS Studio - Aryan News</title>
     <style>
         * { box-sizing: border-box; }
-        body { font-family: 'Roboto', sans-serif; background-color: #e9ecef; margin: 0; padding: 0; display: flex; justify-content: center; }
+        body { font-family: 'Roboto', sans-serif; background-color: #f4f6f8; margin: 0; padding: 0; display: flex; justify-content: center; }
         .app-container { width: 100%; max-width: 500px; background: #ffffff; min-height: 100vh; display: flex; flex-direction: column; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        .header { background: #0d47a1; color: #fff; padding: 18px; text-align: center; font-size: 22px; font-weight: bold; }
+        .header { background: #4285f4; color: #fff; padding: 18px; text-align: center; font-size: 22px; font-weight: bold; }
         .content { padding: 20px; overflow-y: auto; flex: 1; }
         .form-group { margin-bottom: 16px; }
         label { display: block; margin-bottom: 6px; font-size: 14px; color: #333; font-weight: 600; }
         textarea, select, input { width: 100%; padding: 12px; border: 1px solid #ced4da; border-radius: 8px; font-size: 15px; outline: none; }
-        textarea:focus, input:focus { border-color: #0d47a1; }
-        textarea { height: 130px; resize: none; }
+        textarea:focus, input:focus { border-color: #4285f4; }
+        textarea { height: 140px; resize: none; }
         .btn-group { display: flex; gap: 10px; margin-top: 20px; }
         button { flex: 1; padding: 14px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; color: white; cursor: pointer; }
-        .play-btn { background: #28a745; }
-        .download-btn { background: #dc3545; }
-        button:disabled { background: #6c757d; cursor: not-allowed; }
-        .loader { text-align: center; color: #0d47a1; font-weight: bold; margin-top: 10px; display: none; }
-        .hidden { display: none; }
+        .play-btn { background: #0f9d58; }
+        .download-btn { background: #db4437; }
+        button:disabled { background: #9aa0a6; cursor: not-allowed; }
+        .loader { text-align: center; color: #4285f4; font-weight: bold; margin-top: 10px; display: none; }
     </style>
 </head>
 <body>
-
     <div class="app-container">
-        <div class="header">TTS Studio Mobile Pro</div>
-        
+        <div class="header">Gemini Audio Studio</div>
         <div class="content">
             <div class="form-group">
-                <label for="textInput">टेक्स्ट या न्यूज़ स्क्रिप्ट यहाँ डालें:</label>
-                <textarea id="textInput" placeholder="नमस्ते! आप देख रहे हैं आर्यन न्यूज़ टेक..."></textarea>
+                <label>न्यूज़ स्क्रिप्ट (Text):</label>
+                <textarea id="textInput" placeholder="अपनी न्यूज़ स्क्रिप्ट यहाँ डालें..."></textarea>
             </div>
-
             <div class="form-group">
-                <label for="provider">सिस्टम चुनें:</label>
-                <select id="provider" onchange="toggleOptions()">
-                    <option value="gemini">Google AI Studio (Gemini Audio)</option>
-                    <option value="openrouter">OpenRouter (Text/Script Generator)</option>
-                    <option value="browser">Browser Native (Unlimited Free TTS)</option>
+                <label>Google AI Studio API Key:</label>
+                <input type="password" id="apiKey" placeholder="AIzaSy...">
+            </div>
+            <div class="form-group">
+                <label>मॉडल चुनें:</label>
+                <select id="modelSelect">
+                    <option value="gemini-2.5-flash">Gemini 2.5 Flash (Fast & Free)</option>
+                    <option value="gemini-3.1-flash">Gemini 3.1 Flash (High Quality)</option>
                 </select>
             </div>
-
-            <div id="apiKeyGroup" class="form-group">
-                <label for="apiKey">API Key (Gemini या OpenRouter की):</label>
-                <input type="password" id="apiKey" placeholder="अपनी API Key यहाँ डालें...">
-            </div>
-
-            <div class="form-group" id="modelGroup">
-                <label for="model">मॉडल का नाम:</label>
-                <input type="text" id="model" value="gemini-2.5-flash" placeholder="gemini-2.5-flash या OpenRouter model">
-            </div>
-
-            <div class="form-group" id="geminiVoiceGroup">
-                <label for="geminiVoice">आवाज़ (Gemini Voices):</label>
-                <select id="geminiVoice">
+            <div class="form-group">
+                <label>आवाज़ (Voice):</label>
+                <select id="voiceSelect">
                     <option value="Aoede">Aoede</option>
-                    <option value="Charon">Charon</option>
-                    <option value="Fenrir">Fenrir</option>
-                    <option value="Kore">Kore</option>
                     <option value="Puck">Puck</option>
+                    <option value="Charon">Charon</option>
+                    <option value="Kore">Kore</option>
+                    <option value="Fenrir">Fenrir</option>
                 </select>
             </div>
 
-            <div id="loadingText" class="loader">प्रोसेस हो रहा है, थोड़ा इंतज़ार करें...</div>
+            <div id="loadingText" class="loader">ऑडियो बन रहा है, कृपया प्रतीक्षा करें...</div>
 
             <div class="btn-group">
-                <button id="actionBtn" class="play-btn" onclick="processAction()">▶ Play / Process</button>
+                <button id="actionBtn" class="play-btn" onclick="generateAudio()">▶ Play</button>
                 <button id="dlBtn" class="download-btn" onclick="downloadAudio()">⬇ Download</button>
             </div>
-            
             <audio id="audioPlayer" controls style="width: 100%; margin-top: 20px; display: none;"></audio>
         </div>
     </div>
@@ -79,88 +66,43 @@
     <script>
         let currentAudioBlob = null;
 
-        function toggleOptions() {
-            const provider = document.getElementById('provider').value;
-            const apiKeyGroup = document.getElementById('apiKeyGroup');
-            const geminiVoiceGroup = document.getElementById('geminiVoiceGroup');
-            const modelGroup = document.getElementById('modelGroup');
-            const modelInput = document.getElementById('model');
-
-            if (provider === 'browser') {
-                apiKeyGroup.classList.add('hidden');
-                geminiVoiceGroup.classList.add('hidden');
-                modelGroup.classList.add('hidden');
-            } else if (provider === 'gemini') {
-                apiKeyGroup.classList.remove('hidden');
-                geminiVoiceGroup.classList.remove('hidden');
-                modelGroup.classList.remove('hidden');
-                modelInput.value = 'gemini-2.5-flash';
-            } else if (provider === 'openrouter') {
-                apiKeyGroup.classList.remove('hidden');
-                geminiVoiceGroup.classList.add('hidden');
-                modelGroup.classList.remove('hidden');
-                modelInput.value = 'google/gemini-2.5-flash:free';
-            }
-        }
-
-        async function processAction() {
-            const provider = document.getElementById('provider').value;
+        async function generateAudio() {
             const text = document.getElementById('textInput').value.trim();
             const apiKey = document.getElementById('apiKey').value.trim();
-            const model = document.getElementById('model').value.trim();
-            const geminiVoice = document.getElementById('geminiVoice').value;
+            const model = document.getElementById('modelSelect').value;
+            const voice = document.getElementById('voiceSelect').value;
             
             const actionBtn = document.getElementById('actionBtn');
             const loadingText = document.getElementById('loadingText');
             const audioPlayer = document.getElementById('audioPlayer');
 
-            if (!text) { alert('टेक्स्ट बॉक्स खाली है!'); return; }
-            if (provider !== 'browser' && !apiKey) { alert('API Key डालना ज़रूरी है!'); return; }
+            if (!text) { alert('टेक्स्ट डालें!'); return; }
+            if (!apiKey) { alert('API Key डालना ज़रूरी है!'); return; }
 
-            // Browser Native Speech
-            if (provider === 'browser') {
-                window.speechSynthesis.cancel();
-                let utterance = new SpeechSynthesisUtterance(text);
-                window.speechSynthesis.speak(utterance);
-                return;
-            }
-
-            // Cloudflare Backend Call
             actionBtn.disabled = true;
             loadingText.style.display = 'block';
             audioPlayer.style.display = 'none';
-            currentAudioBlob = null;
 
             try {
-                // यह आपके Cloudflare API फंक्शन को कॉल करेगा
                 const response = await fetch('/api/generate', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ provider, text, apiKey, model, voice: geminiVoice })
+                    body: JSON.stringify({ text, apiKey, model, voice })
                 });
 
                 const result = await response.json();
 
                 if (!response.ok) throw new Error(result.error || 'Server Error');
 
-                if (result.type === 'audio') {
-                    // Gemini Audio Playback
-                    const audioSrc = `data:${result.format};base64,${result.audio}`;
-                    
-                    // Convert base64 to Blob for downloading later
-                    const fetchResponse = await fetch(audioSrc);
-                    currentAudioBlob = await fetchResponse.blob();
+                const audioSrc = `data:${result.format};base64,${result.audio}`;
+                const fetchResponse = await fetch(audioSrc);
+                currentAudioBlob = await fetchResponse.blob();
 
-                    audioPlayer.src = audioSrc;
-                    audioPlayer.style.display = 'block';
-                    audioPlayer.play();
-                } else if (result.type === 'text') {
-                    // OpenRouter Text Processing
-                    document.getElementById('textInput').value = result.content;
-                    alert('OpenRouter ने स्क्रिप्ट जनरेट कर दी है। सुनने के लिए अब Browser Native या Gemini चुनें!');
-                }
+                audioPlayer.src = audioSrc;
+                audioPlayer.style.display = 'block';
+                audioPlayer.play();
             } catch (error) {
-                alert(`एरर आ गया भाई: ${error.message}`);
+                alert(`एरर: ${error.message}`);
             } finally {
                 actionBtn.disabled = false;
                 loadingText.style.display = 'none';
@@ -168,13 +110,10 @@
         }
 
         function downloadAudio() {
-            if (!currentAudioBlob) {
-                alert('पहले Gemini से ऑडियो जनरेट करें, फिर डाउनलोड करें।');
-                return;
-            }
+            if (!currentAudioBlob) { alert('पहले Play दबाकर ऑडियो जनरेट करें!'); return; }
             const a = document.createElement('a');
             a.href = URL.createObjectURL(currentAudioBlob);
-            a.download = `aryan_news_audio_${Date.now()}.ogg`;
+            a.download = `Gemini_Audio_${Date.now()}.ogg`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
