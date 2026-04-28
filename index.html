@@ -1,361 +1,184 @@
 <!DOCTYPE html>
 <html lang="hi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="theme-color" content="#0f172a">
-  <title>🎙️ स्पीच-2-ऑडियो ऐप</title>
-  <style>
-    :root {
-      --bg: #0f172a;
-      --card: #1e293b;
-      --text: #f8fafc;
-      --subtext: #94a3b8;
-      --primary: #3b82f6;
-      --primary-hover: #2563eb;
-      --success: #10b981;
-      --radius: 16px;
-      --shadow: 0 4px 20px rgba(0,0,0,0.4);
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; -webkit-tap-highlight-color: transparent; }
-    body {
-      background: var(--bg); color: var(--text); min-height: 100vh;
-      display: flex; justify-content: center; align-items: flex-start;
-      padding: 12px; touch-action: manipulation;
-    }
-    .app-container {
-      width: 100%; max-width: 420px; background: var(--bg);
-      border-radius: var(--radius); overflow: hidden;
-      box-shadow: var(--shadow); position: relative;
-      display: flex; flex-direction: column; height: 96vh;
-    }
-    header {
-      background: var(--card); padding: 16px; display: flex;
-      justify-content: space-between; align-items: center;
-      border-bottom: 1px solid #334155;
-    }
-    header h1 { font-size: 18px; font-weight: 600; }
-    .settings-btn {
-      background: none; border: none; color: var(--primary); font-size: 24px; cursor: pointer;
-    }
-    main { flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; }
-    textarea {
-      width: 100%; min-height: 140px; background: #0b1220; color: var(--text);
-      border: 1px solid #334155; border-radius: 12px; padding: 14px;
-      font-size: 15px; resize: none; outline: none;
-    }
-    textarea:focus { border-color: var(--primary); }
-    .meta-row { display: flex; justify-content: space-between; font-size: 13px; color: var(--subtext); }
-    select, input[type="range"] {
-      width: 100%; background: #0b1220; color: var(--text);      border: 1px solid #334155; border-radius: 10px; padding: 12px;
-      font-size: 14px; outline: none;
-    }
-    select:focus { border-color: var(--primary); }
-    .slider-box { display: flex; align-items: center; gap: 12px; }
-    .slider-box label { flex: 1; font-size: 14px; color: var(--subtext); }
-    .slider-box span { color: var(--primary); font-weight: 600; }
-    .btn {
-      width: 100%; background: var(--primary); color: white; border: none;
-      padding: 14px; border-radius: 12px; font-size: 15px; font-weight: 600;
-      cursor: pointer; transition: 0.2s; margin-top: 4px;
-    }
-    .btn:active { transform: scale(0.98); background: var(--primary-hover); }
-    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
-    audio { width: 100%; margin-top: 10px; border-radius: 10px; }
-    .download-btn {
-      background: var(--success); margin-top: 10px; display: none;
-    }
-    .download-btn:hover { background: #059669; }
-    .modal {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: flex-end;
-      z-index: 100;
-    }
-    .modal.active { display: flex; }
-    .modal-content {
-      background: var(--card); width: 100%; max-width: 420px; border-radius: 20px 20px 0 0;
-      padding: 20px; animation: slideUp 0.3s ease;
-    }
-    @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-    .modal-header { display: flex; justify-content: space-between; margin-bottom: 16px; }
-    .close-btn { background: none; border: none; color: var(--subtext); font-size: 20px; cursor: pointer; }
-    .form-group { margin-bottom: 14px; }
-    .form-group label { display: block; margin-bottom: 6px; font-size: 13px; color: var(--subtext); }
-    .form-group input { width: 100%; padding: 12px; background: #0b1220; border: 1px solid #334155; border-radius: 8px; color: white; }
-    .hint { font-size: 11px; color: #64748b; margin-top: 4px; }
-    .toast {
-      position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-      background: #10b981; color: white; padding: 10px 20px; border-radius: 20px;
-      font-size: 13px; opacity: 0; transition: 0.3s; pointer-events: none; z-index: 200;
-    }
-    .toast.show { opacity: 1; bottom: 40px; }
-    footer { padding: 12px; text-align: center; font-size: 12px; color: #475569; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Aryan News Tech TTS Pro</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: 'Roboto', sans-serif; background-color: #e9ecef; margin: 0; padding: 0; display: flex; justify-content: center; }
+        .app-container { width: 100%; max-width: 500px; background: #ffffff; min-height: 100vh; display: flex; flex-direction: column; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .header { background: #0d47a1; color: #fff; padding: 18px; text-align: center; font-size: 22px; font-weight: bold; }
+        .content { padding: 20px; overflow-y: auto; flex: 1; }
+        .form-group { margin-bottom: 16px; }
+        label { display: block; margin-bottom: 6px; font-size: 14px; color: #333; font-weight: 600; }
+        textarea, select, input { width: 100%; padding: 12px; border: 1px solid #ced4da; border-radius: 8px; font-size: 15px; outline: none; }
+        textarea:focus, input:focus { border-color: #0d47a1; }
+        textarea { height: 130px; resize: none; }
+        .btn-group { display: flex; gap: 10px; margin-top: 20px; }
+        button { flex: 1; padding: 14px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; color: white; cursor: pointer; }
+        .play-btn { background: #28a745; }
+        .download-btn { background: #dc3545; }
+        button:disabled { background: #6c757d; cursor: not-allowed; }
+        .loader { text-align: center; color: #0d47a1; font-weight: bold; margin-top: 10px; display: none; }
+        .hidden { display: none; }
+    </style>
 </head>
 <body>
 
-<div class="app-container">
-  <header>
-    <h1>🎙️ स्पीच-2-ऑडियो</h1>    <button class="settings-btn" onclick="toggleSettings()">⚙️</button>
-  </header>
+    <div class="app-container">
+        <div class="header">TTS Studio Mobile Pro</div>
+        
+        <div class="content">
+            <div class="form-group">
+                <label for="textInput">टेक्स्ट या न्यूज़ स्क्रिप्ट यहाँ डालें:</label>
+                <textarea id="textInput" placeholder="नमस्ते! आप देख रहे हैं आर्यन न्यूज़ टेक..."></textarea>
+            </div>
 
-  <main>
-    <textarea id="textInput" placeholder="यहाँ हिंदी या अंग्रेजी में टेक्स्ट लिखें..."></textarea>
-    <div class="meta-row">
-      <span id="charCount">0 अक्षर</span>
-      <span id="wordCount">0 शब्द</span>
+            <div class="form-group">
+                <label for="provider">सिस्टम चुनें:</label>
+                <select id="provider" onchange="toggleOptions()">
+                    <option value="gemini">Google AI Studio (Gemini Audio)</option>
+                    <option value="openrouter">OpenRouter (Text/Script Generator)</option>
+                    <option value="browser">Browser Native (Unlimited Free TTS)</option>
+                </select>
+            </div>
+
+            <div id="apiKeyGroup" class="form-group">
+                <label for="apiKey">API Key (Gemini या OpenRouter की):</label>
+                <input type="password" id="apiKey" placeholder="अपनी API Key यहाँ डालें...">
+            </div>
+
+            <div class="form-group" id="modelGroup">
+                <label for="model">मॉडल का नाम:</label>
+                <input type="text" id="model" value="gemini-2.5-flash" placeholder="gemini-2.5-flash या OpenRouter model">
+            </div>
+
+            <div class="form-group" id="geminiVoiceGroup">
+                <label for="geminiVoice">आवाज़ (Gemini Voices):</label>
+                <select id="geminiVoice">
+                    <option value="Aoede">Aoede</option>
+                    <option value="Charon">Charon</option>
+                    <option value="Fenrir">Fenrir</option>
+                    <option value="Kore">Kore</option>
+                    <option value="Puck">Puck</option>
+                </select>
+            </div>
+
+            <div id="loadingText" class="loader">प्रोसेस हो रहा है, थोड़ा इंतज़ार करें...</div>
+
+            <div class="btn-group">
+                <button id="actionBtn" class="play-btn" onclick="processAction()">▶ Play / Process</button>
+                <button id="dlBtn" class="download-btn" onclick="downloadAudio()">⬇ Download</button>
+            </div>
+            
+            <audio id="audioPlayer" controls style="width: 100%; margin-top: 20px; display: none;"></audio>
+        </div>
     </div>
 
-    <select id="backendSelect">
-      <option value="browser">🌐 ब्राउज़र (निःशुल्क, असीमित)</option>
-      <option value="openrouter">🌐 OpenRouter API</option>
-      <option value="google">🤖 Google Cloud TTS API</option>
-    </select>
+    <script>
+        let currentAudioBlob = null;
 
-    <select id="voiceSelect">
-      <option value="auto">🎯 ऑटो (हिंदी प्राथमिकता)</option>
-    </select>
+        function toggleOptions() {
+            const provider = document.getElementById('provider').value;
+            const apiKeyGroup = document.getElementById('apiKeyGroup');
+            const geminiVoiceGroup = document.getElementById('geminiVoiceGroup');
+            const modelGroup = document.getElementById('modelGroup');
+            const modelInput = document.getElementById('model');
 
-    <div class="slider-box">
-      <label>स्पीड:</label>
-      <input type="range" id="speedSlider" min="0.5" max="2.0" step="0.1" value="1.0">
-      <span id="speedValue">1.0x</span>
-    </div>
+            if (provider === 'browser') {
+                apiKeyGroup.classList.add('hidden');
+                geminiVoiceGroup.classList.add('hidden');
+                modelGroup.classList.add('hidden');
+            } else if (provider === 'gemini') {
+                apiKeyGroup.classList.remove('hidden');
+                geminiVoiceGroup.classList.remove('hidden');
+                modelGroup.classList.remove('hidden');
+                modelInput.value = 'gemini-2.5-flash';
+            } else if (provider === 'openrouter') {
+                apiKeyGroup.classList.remove('hidden');
+                geminiVoiceGroup.classList.add('hidden');
+                modelGroup.classList.remove('hidden');
+                modelInput.value = 'google/gemini-2.5-flash:free';
+            }
+        }
 
-    <button class="btn" id="generateBtn" onclick="generateSpeech()">🎵 ऑडियो बनाएं</button>
+        async function processAction() {
+            const provider = document.getElementById('provider').value;
+            const text = document.getElementById('textInput').value.trim();
+            const apiKey = document.getElementById('apiKey').value.trim();
+            const model = document.getElementById('model').value.trim();
+            const geminiVoice = document.getElementById('geminiVoice').value;
+            
+            const actionBtn = document.getElementById('actionBtn');
+            const loadingText = document.getElementById('loadingText');
+            const audioPlayer = document.getElementById('audioPlayer');
 
-    <audio id="audioPlayer" controls style="display:none;"></audio>
-    <button class="btn download-btn" id="downloadBtn" onclick="downloadAudio()">⬇️ MP3 डाउनलोड करें</button>
-  </main>
+            if (!text) { alert('टेक्स्ट बॉक्स खाली है!'); return; }
+            if (provider !== 'browser' && !apiKey) { alert('API Key डालना ज़रूरी है!'); return; }
 
-  <footer>© 2026 TTS App | मोबाइल ऑप्टिमाइज्ड</footer>
-</div>
+            // Browser Native Speech
+            if (provider === 'browser') {
+                window.speechSynthesis.cancel();
+                let utterance = new SpeechSynthesisUtterance(text);
+                window.speechSynthesis.speak(utterance);
+                return;
+            }
 
-<!-- Settings Modal -->
-<div class="modal" id="settingsModal">
-  <div class="modal-content">
-    <div class="modal-header">
-      <h3>⚙️ API सेटिंग्स</h3>
-      <button class="close-btn" onclick="toggleSettings()">✕</button>
-    </div>
-    <div class="form-group">
-      <label>OpenRouter API Key</label>
-      <input type="password" id="orKey" placeholder="sk-or-...">
-      <div class="hint">OpenRouter से कॉपी करें। फ्री मॉडल: <code>openai/tts-1</code></div>
-    </div>
-    <div class="form-group">
-      <label>OpenRouter मॉडल नाम</label>
-      <input type="text" id="orModel" value="openai/tts-1" placeholder="openai/tts-1">    </div>
-    <hr style="border-color:#334155; margin:16px 0;">
-    <div class="form-group">
-      <label>Google Cloud TTS API Key</label>
-      <input type="password" id="googleKey" placeholder="AIza...">
-      <div class="hint">Google Cloud Console से TTS API Key बनाएं</div>
-    </div>
-    <button class="btn" onclick="saveSettings()">💾 सेव करें</button>
-  </div>
-</div>
+            // Cloudflare Backend Call
+            actionBtn.disabled = true;
+            loadingText.style.display = 'block';
+            audioPlayer.style.display = 'none';
+            currentAudioBlob = null;
 
-<div class="toast" id="toast">✅ हो गया!</div>
+            try {
+                // यह आपके Cloudflare API फंक्शन को कॉल करेगा
+                const response = await fetch('/api/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ provider, text, apiKey, model, voice: geminiVoice })
+                });
 
-<script>
-  // --- Config & State ---
-  const els = {
-    text: document.getElementById('textInput'),
-    char: document.getElementById('charCount'),
-    word: document.getElementById('wordCount'),
-    backend: document.getElementById('backendSelect'),
-    voice: document.getElementById('voiceSelect'),
-    speed: document.getElementById('speedSlider'),
-    speedVal: document.getElementById('speedValue'),
-    btn: document.getElementById('generateBtn'),
-    audio: document.getElementById('audioPlayer'),
-    dlBtn: document.getElementById('downloadBtn'),
-    modal: document.getElementById('settingsModal'),
-    toast: document.getElementById('toast'),
-    orKey: document.getElementById('orKey'),
-    orModel: document.getElementById('orModel'),
-    gKey: document.getElementById('googleKey')
-  };
+                const result = await response.json();
 
-  let audioBlobUrl = null;
-  let currentAudioBlob = null;
+                if (!response.ok) throw new Error(result.error || 'Server Error');
 
-  // --- Init ---
-  function init() {
-    // Load saved keys
-    els.orKey.value = localStorage.getItem('orKey') || '';
-    els.orModel.value = localStorage.getItem('orModel') || 'openai/tts-1';
-    els.gKey.value = localStorage.getItem('gKey') || '';
+                if (result.type === 'audio') {
+                    // Gemini Audio Playback
+                    const audioSrc = `data:${result.format};base64,${result.audio}`;
+                    
+                    // Convert base64 to Blob for downloading later
+                    const fetchResponse = await fetch(audioSrc);
+                    currentAudioBlob = await fetchResponse.blob();
 
-    // Populate browser voices
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.onvoiceschanged = populateBrowserVoices;
-      populateBrowserVoices();
-    }
+                    audioPlayer.src = audioSrc;
+                    audioPlayer.style.display = 'block';
+                    audioPlayer.play();
+                } else if (result.type === 'text') {
+                    // OpenRouter Text Processing
+                    document.getElementById('textInput').value = result.content;
+                    alert('OpenRouter ने स्क्रिप्ट जनरेट कर दी है। सुनने के लिए अब Browser Native या Gemini चुनें!');
+                }
+            } catch (error) {
+                alert(`एरर आ गया भाई: ${error.message}`);
+            } finally {
+                actionBtn.disabled = false;
+                loadingText.style.display = 'none';
+            }
+        }
 
-    // Event Listeners    els.text.addEventListener('input', updateCounts);
-    els.speed.addEventListener('input', () => els.speedVal.textContent = els.speed.value + 'x');
-    els.backend.addEventListener('change', updateVoiceOptions);
-    
-    updateCounts();
-    showToast('🚀 ऐप तैयार है');
-  }
-
-  function updateCounts() {
-    const txt = els.text.value;
-    els.char.textContent = `${txt.length} अक्षर`;
-    els.word.textContent = `${txt.trim() === '' ? 0 : txt.trim().split(/\s+/).length} शब्द`;
-  }
-
-  function populateBrowserVoices() {
-    if (els.backend.value !== 'browser') return;
-    const voices = speechSynthesis.getVoices().filter(v => v.lang.startsWith('hi'));
-    els.voice.innerHTML = '<option value="auto">🎯 ऑटो (हिंदी प्राथमिकता)</option>';
-    voices.forEach((v, i) => {
-      els.voice.innerHTML += `<option value="${i}">🗣️ ${v.name}</option>`;
-    });
-  }
-
-  function updateVoiceOptions() {
-    const backend = els.backend.value;
-    if (backend === 'browser') {
-      populateBrowserVoices();
-      els.dlBtn.style.display = 'none';
-      showToast('ℹ️ ब्राउज़र मोड में डाउनलोड उपलब्ध नहीं');
-    } else if (backend === 'openrouter') {
-      els.voice.innerHTML = '<option value="alloy">alloy</option><option value="echo">echo</option><option value="fable">fable</option><option value="onyx">onyx</option><option value="nova">nova</option><option value="shimmer">shimmer</option>';
-      els.dlBtn.style.display = 'block';
-    } else if (backend === 'google') {
-      els.voice.innerHTML = '<option value="hi-IN-Standard-A">हिंदी (Standard-A)</option><option value="hi-IN-Standard-B">हिंदी (Standard-B)</option><option value="hi-IN-Standard-C">हिंदी (Standard-C)</option><option value="hi-IN-Standard-D">हिंदी (Standard-D)</option>';
-      els.dlBtn.style.display = 'block';
-    }
-  }
-
-  function toggleSettings() {
-    els.modal.classList.toggle('active');
-  }
-
-  function saveSettings() {
-    localStorage.setItem('orKey', els.orKey.value.trim());
-    localStorage.setItem('orModel', els.orModel.value.trim());
-    localStorage.setItem('gKey', els.gKey.value.trim());
-    toggleSettings();
-    showToast('✅ सेटिंग्स सेव हो गईं');
-  }
-  function showToast(msg) {
-    els.toast.textContent = msg;
-    els.toast.classList.add('show');
-    setTimeout(() => els.toast.classList.remove('show'), 2000);
-  }
-
-  // --- Core Logic ---
-  async function generateSpeech() {
-    const text = els.text.value.trim();
-    if (!text) return showToast('⚠️ कृपया टेक्स्ट डालें');
-
-    const backend = els.backend.value;
-    const speed = parseFloat(els.speed.value);
-    const voice = els.voice.value;
-
-    els.btn.disabled = true;
-    els.btn.textContent = '⏳ बना रहे है...';
-
-    try {
-      if (backend === 'browser') {
-        speakBrowser(text, speed, voice);
-        els.dlBtn.style.display = 'none';
-        els.audio.style.display = 'none';
-      } else if (backend === 'openrouter') {
-        await fetchOpenRouter(text, speed, voice);
-      } else if (backend === 'google') {
-        await fetchGoogleTTS(text, speed, voice);
-      }
-      showToast('✅ ऑडियो तैयार!');
-    } catch (err) {
-      console.error(err);
-      showToast('❌ त्रुटि: ' + err.message);
-    } finally {
-      els.btn.disabled = false;
-      els.btn.textContent = '🎵 ऑडियो बनाएं';
-    }
-  }
-
-  // Browser TTS
-  function speakBrowser(text, speed, voiceIdx) {
-    window.speechSynthesis.cancel();
-    const utt = new SpeechSynthesisUtterance(text);
-    utt.rate = speed;
-    utt.lang = 'hi-IN';
-    if (voiceIdx !== 'auto') {
-      const voices = speechSynthesis.getVoices();
-      utt.voice = voices[parseInt(voiceIdx)] || voices[0];
-    }
-    speechSynthesis.speak(utt);
-  }
-  // OpenRouter TTS
-  async function fetchOpenRouter(text, speed, voice) {
-    const key = els.orKey.value.trim();
-    const model = els.orModel.value.trim();
-    if (!key) throw new Error('OpenRouter API Key डालें');
-
-    const res = await fetch('https://openrouter.ai/api/v1/audio/speech', {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${key}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model, input: text, voice: voice, speed })
-    });
-    if (!res.ok) throw new Error(await res.text());
-    
-    const blob = await res.blob();
-    setupAudio(blob, 'tts.mp3');
-  }
-
-  // Google Cloud TTS
-  async function fetchGoogleTTS(text, speed, voice) {
-    const key = els.gKey.value.trim();
-    if (!key) throw new Error('Google API Key डालें');
-
-    const res = await fetch('https://texttospeech.googleapis.com/v1/text:synthesize', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        input: { text },
-        voice: { languageCode: 'hi-IN', name: voice },
-        audioConfig: { audioEncoding: 'MP3', speakingRate: speed }
-      })
-    });
-    const data = await res.json();
-    if (data.error) throw new Error(data.error.message);
-
-    const binaryString = window.atob(data.audioContent);
-    const len = binaryString.length;
-    const bytes = new Uint8Array(len);
-    for (let i = 0; i < len; i++) bytes[i] = binaryString.charCodeAt(i);
-    const blob = new Blob([bytes], { type: 'audio/mp3' });
-    setupAudio(blob, 'google_tts.mp3');
-  }
-
-  function setupAudio(blob, filename) {
-    currentAudioBlob = { blob, filename };
-    if (audioBlobUrl) URL.revokeObjectURL(audioBlobUrl);
-    audioBlobUrl = URL.createObjectURL(blob);
-    els.audio.src = audioBlobUrl;
-    els.audio.style.display = 'block';
-    els.audio.play();    els.dlBtn.style.display = 'block';
-  }
-
-  function downloadAudio() {
-    if (!currentAudioBlob) return;
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(currentAudioBlob.blob);
-    a.download = currentAudioBlob.filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-  }
-
-  // Run
-  window.addEventListener('DOMContentLoaded', init);
-</script>
+        function downloadAudio() {
+            if (!currentAudioBlob) {
+                alert('पहले Gemini से ऑडियो जनरेट करें, फिर डाउनलोड करें।');
+                return;
+            }
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(currentAudioBlob);
+            a.download = `aryan_news_audio_${Date.now()}.ogg`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+    </script>
 </body>
 </html>
