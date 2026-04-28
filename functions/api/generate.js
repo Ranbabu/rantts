@@ -1,9 +1,16 @@
 export async function onRequestPost(context) {
-    const { request } = context;
+    const { request, env } = context;
 
     try {
         const body = await request.json();
-        const { text, apiKey, model, voice } = body;
+        const { text, model, voice } = body;
+
+        // Cloudflare Settings से API Key लेना
+        const apiKey = env.GEMINI_API_KEY;
+
+        if (!apiKey) {
+            return new Response(JSON.stringify({ error: "Cloudflare में API Key सेट नहीं है!" }), { status: 500, headers: { "Content-Type": "application/json" } });
+        }
 
         const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
         
