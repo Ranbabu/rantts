@@ -33,8 +33,7 @@
 
             <label>Gemini मॉडल:</label>
             <select id="modelSelect">
-                <!-- नोट: Gemini के Audio सपोर्टेड मॉडल्स 'gemini-1.5-flash' होते हैं, मैंने इसे डिफ़ॉल्ट रखा है ताकि एरर न आए -->
-                <option value="gemini-1.5-flash">Gemini 1.5 Flash (Recommended/Fast)</option>
+                <option value="gemini-1.5-flash">Gemini 1.5 Flash (Super Fast)</option>
                 <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
                 <option value="gemini-3.1-flash">Gemini 3.1 Flash</option>
             </select>
@@ -58,7 +57,7 @@
             <audio id="audioPlayer" controls style="width: 100%; margin-top: 20px; display: none;"></audio>
             
             <div class="info-box">
-                <b>Note:</b> API Key सुरक्षित रूप से Cloudflare सर्वर में सेव है। यह वेबसाइट सीधे API से कनेक्टेड है।
+                <b>Note:</b> API सुरक्षित रूप से कनेक्टेड है।
             </div>
         </div>
     </div>
@@ -66,7 +65,7 @@
     <script>
         let currentBlob = null;
 
-        // यहाँ आपका Cloudflare Worker का लाइव URL डाला गया है
+        // ध्यान दें: अब सिर्फ मेन URL है, आगे कोई /api/generate नहीं है
         const CLOUDFLARE_API_URL = 'https://rantts.babu902654.workers.dev/';
 
         async function generateAudio() {
@@ -85,21 +84,14 @@
             player.style.display = 'none';
 
             try {
-                // डायरेक्ट Cloudflare API को कॉल कर रहे हैं
                 const res = await fetch(CLOUDFLARE_API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ text, model, voice })
                 });
                 
-                // अगर API से JSON नहीं आता है तो यह एरर पकड़ेगा
-                let data;
-                try {
-                    data = await res.json();
-                } catch (jsonError) {
-                    throw new Error("Server से सही जवाब नहीं मिला। कृपया अपना Cloudflare Worker चेक करें।");
-                }
-
+                const data = await res.json(); 
+                
                 if(!res.ok) throw new Error(data.error || 'Server Error');
                 
                 const audioSrc = 'data:' + data.format + ';base64,' + data.audio;
@@ -110,6 +102,7 @@
                 player.style.display = 'block';
                 player.play();
             } catch(e) {
+                console.error(e);
                 alert('एरर आ गया: ' + e.message);
             } finally {
                 playBtn.disabled = false;
@@ -121,7 +114,7 @@
             if(!currentBlob) { alert('पहले Play दबाकर ऑडियो जनरेट करें!'); return; }
             const a = document.createElement('a');
             a.href = URL.createObjectURL(currentBlob);
-            a.download = 'AryanNews_Audio_' + Date.now() + '.ogg'; // Google OGG फॉर्मेट देता है
+            a.download = 'AryanNews_Audio_' + Date.now() + '.ogg'; 
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
@@ -129,4 +122,3 @@
     </script>
 </body>
 </html>
-
