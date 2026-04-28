@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Gemini TTS Studio - Aryan News</title>
+    <title>Gemini TTS - Aryan News</title>
     <style>
         * { box-sizing: border-box; }
         body { font-family: 'Roboto', sans-serif; background: #f0f4f8; margin: 0; padding: 0; display: flex; justify-content: center; }
@@ -29,44 +29,40 @@
         <div class="header">Aryan News TTS</div>
         <div class="content">
             <label>टेक्स्ट या न्यूज़ स्क्रिप्ट (Text):</label>
-            <textarea id="textInput" placeholder="नमस्ते! आप देख रहे हैं आर्यन न्यूज़ टेक..."></textarea>
+            <textarea id="textInput" placeholder="नमस्ते! आप देख रहे हैं आर्यन न्यूज़..."></textarea>
 
             <label>Gemini मॉडल:</label>
             <select id="modelSelect">
-                <option value="gemini-1.5-flash">Gemini 1.5 Flash (Super Fast)</option>
+                <option value="gemini-1.5-flash">Gemini 1.5 Flash (Best for Audio)</option>
                 <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
-                <option value="gemini-3.1-flash">Gemini 3.1 Flash</option>
             </select>
 
             <label>आवाज़ (Voice):</label>
             <select id="voiceSelect">
                 <option value="Aoede">Aoede (Female)</option>
                 <option value="Puck">Puck (Male)</option>
-                <option value="Charon">Charon (Male Deep)</option>
-                <option value="Kore">Kore (Female Soft)</option>
-                <option value="Fenrir">Fenrir (Male Bold)</option>
+                <option value="Charon">Charon (Deep Male)</option>
             </select>
 
             <div id="loadingText" class="loader">ऑडियो बन रहा है, कृपया प्रतीक्षा करें...</div>
 
             <div class="btn-group">
-                <button id="playBtn" class="play-btn" onclick="generateAudio()">▶ Play Audio</button>
-                <button id="dlBtn" class="dl-btn" onclick="downloadAudio()">⬇ Download MP3</button>
+                <button id="playBtn" class="play-btn" onclick="generateAudio()">▶ Play</button>
+                <button id="dlBtn" class="dl-btn" onclick="downloadAudio()">⬇ Download</button>
             </div>
             
             <audio id="audioPlayer" controls style="width: 100%; margin-top: 20px; display: none;"></audio>
             
             <div class="info-box">
-                <b>Note:</b> API सुरक्षित रूप से कनेक्टेड है।
+                <b>Note:</b> API Backend is Connected.
             </div>
         </div>
     </div>
 
     <script>
         let currentBlob = null;
-
-        // ध्यान दें: अब सिर्फ मेन URL है, आगे कोई /api/generate नहीं है
-        const CLOUDFLARE_API_URL = 'https://rantts.babu902654.workers.dev/';
+        // URL में /api जोड़ दिया गया है
+        const API_URL = 'https://rantts.babu902654.workers.dev/api';
 
         async function generateAudio() {
             const text = document.getElementById('textInput').value.trim();
@@ -84,7 +80,7 @@
             player.style.display = 'none';
 
             try {
-                const res = await fetch(CLOUDFLARE_API_URL, {
+                const res = await fetch(API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ text, model, voice })
@@ -103,7 +99,11 @@
                 player.play();
             } catch(e) {
                 console.error(e);
-                alert('एरर आ गया: ' + e.message);
+                if (e.message === "Failed to fetch") {
+                    alert('एरर: आपका ब्राउज़र (Chrome) कनेक्शन ब्लॉक कर रहा है। कृपया इसे Incognito Mode (गुप्त टैब) में खोलकर चेक करें।');
+                } else {
+                    alert('एरर: ' + e.message);
+                }
             } finally {
                 playBtn.disabled = false;
                 loader.style.display = 'none';
