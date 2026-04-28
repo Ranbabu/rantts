@@ -1,257 +1,361 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AI Chatbot (OpenRouter)</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        /* Custom scrollbar for chat area */
-        #chat-container::-webkit-scrollbar { width: 6px; }
-        #chat-container::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        .message-enter { animation: fadeIn 0.3s ease-out forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0f172a">
+  <title>🎙️ स्पीच-2-ऑडियो ऐप</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --text: #f8fafc;
+      --subtext: #94a3b8;
+      --primary: #3b82f6;
+      --primary-hover: #2563eb;
+      --success: #10b981;
+      --radius: 16px;
+      --shadow: 0 4px 20px rgba(0,0,0,0.4);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; -webkit-tap-highlight-color: transparent; }
+    body {
+      background: var(--bg); color: var(--text); min-height: 100vh;
+      display: flex; justify-content: center; align-items: flex-start;
+      padding: 12px; touch-action: manipulation;
+    }
+    .app-container {
+      width: 100%; max-width: 420px; background: var(--bg);
+      border-radius: var(--radius); overflow: hidden;
+      box-shadow: var(--shadow); position: relative;
+      display: flex; flex-direction: column; height: 96vh;
+    }
+    header {
+      background: var(--card); padding: 16px; display: flex;
+      justify-content: space-between; align-items: center;
+      border-bottom: 1px solid #334155;
+    }
+    header h1 { font-size: 18px; font-weight: 600; }
+    .settings-btn {
+      background: none; border: none; color: var(--primary); font-size: 24px; cursor: pointer;
+    }
+    main { flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; }
+    textarea {
+      width: 100%; min-height: 140px; background: #0b1220; color: var(--text);
+      border: 1px solid #334155; border-radius: 12px; padding: 14px;
+      font-size: 15px; resize: none; outline: none;
+    }
+    textarea:focus { border-color: var(--primary); }
+    .meta-row { display: flex; justify-content: space-between; font-size: 13px; color: var(--subtext); }
+    select, input[type="range"] {
+      width: 100%; background: #0b1220; color: var(--text);      border: 1px solid #334155; border-radius: 10px; padding: 12px;
+      font-size: 14px; outline: none;
+    }
+    select:focus { border-color: var(--primary); }
+    .slider-box { display: flex; align-items: center; gap: 12px; }
+    .slider-box label { flex: 1; font-size: 14px; color: var(--subtext); }
+    .slider-box span { color: var(--primary); font-weight: 600; }
+    .btn {
+      width: 100%; background: var(--primary); color: white; border: none;
+      padding: 14px; border-radius: 12px; font-size: 15px; font-weight: 600;
+      cursor: pointer; transition: 0.2s; margin-top: 4px;
+    }
+    .btn:active { transform: scale(0.98); background: var(--primary-hover); }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    audio { width: 100%; margin-top: 10px; border-radius: 10px; }
+    .download-btn {
+      background: var(--success); margin-top: 10px; display: none;
+    }
+    .download-btn:hover { background: #059669; }
+    .modal {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: flex-end;
+      z-index: 100;
+    }
+    .modal.active { display: flex; }
+    .modal-content {
+      background: var(--card); width: 100%; max-width: 420px; border-radius: 20px 20px 0 0;
+      padding: 20px; animation: slideUp 0.3s ease;
+    }
+    @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+    .modal-header { display: flex; justify-content: space-between; margin-bottom: 16px; }
+    .close-btn { background: none; border: none; color: var(--subtext); font-size: 20px; cursor: pointer; }
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; margin-bottom: 6px; font-size: 13px; color: var(--subtext); }
+    .form-group input { width: 100%; padding: 12px; background: #0b1220; border: 1px solid #334155; border-radius: 8px; color: white; }
+    .hint { font-size: 11px; color: #64748b; margin-top: 4px; }
+    .toast {
+      position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+      background: #10b981; color: white; padding: 10px 20px; border-radius: 20px;
+      font-size: 13px; opacity: 0; transition: 0.3s; pointer-events: none; z-index: 200;
+    }
+    .toast.show { opacity: 1; bottom: 40px; }
+    footer { padding: 12px; text-align: center; font-size: 12px; color: #475569; }
+  </style>
 </head>
-<body class="bg-gray-50 h-screen flex flex-col font-sans text-gray-800">
+<body>
 
-    <header class="bg-white shadow-sm px-4 py-3 flex justify-between items-center z-10 relative">
-        <div class="flex items-center gap-2">
-            <i class="fa-solid fa-robot text-blue-600 text-xl"></i>
-            <h1 class="text-lg font-semibold text-gray-800">AI Chat</h1>
-        </div>
-        <button id="settings-btn" class="p-2 text-gray-500 hover:text-blue-600 focus:outline-none transition-colors">
-            <i class="fa-solid fa-sliders text-xl"></i>
-        </button>
-    </header>
+<div class="app-container">
+  <header>
+    <h1>🎙️ स्पीच-2-ऑडियो</h1>    <button class="settings-btn" onclick="toggleSettings()">⚙️</button>
+  </header>
 
-    <main id="chat-container" class="flex-1 overflow-y-auto p-4 space-y-4 pb-20">
-        <div class="flex justify-start message-enter">
-            <div class="bg-white border border-gray-200 text-gray-800 rounded-2xl rounded-tl-sm px-4 py-2 max-w-[85%] shadow-sm">
-                नमस्ते! मैं आपका AI असिस्टेंट हूँ। कृपया सेटिंग्स (⚙️) में जाकर बस अपनी OpenRouter API Key डालें। मॉडल पहले से ही बेस्ट फ्री सर्वर पर सेट है।
-            </div>
-        </div>
-    </main>
-
-    <footer class="bg-white border-t border-gray-200 p-3 sticky bottom-0">
-        <form id="chat-form" class="flex gap-2 items-end max-w-3xl mx-auto">
-            <div class="flex-1 bg-gray-100 rounded-2xl px-4 py-2 border border-gray-200 focus-within:border-blue-400 focus-within:ring-1 focus-within:ring-blue-400 transition-all">
-                <textarea id="user-input" rows="1" class="w-full bg-transparent outline-none resize-none max-h-32 text-gray-800" placeholder="Message AI..." required></textarea>
-            </div>
-            <button type="submit" id="send-btn" class="bg-blue-600 text-white rounded-full w-10 h-10 flex items-center justify-center hover:bg-blue-700 transition-colors flex-shrink-0">
-                <i class="fa-solid fa-paper-plane"></i>
-            </button>
-        </form>
-    </footer>
-
-    <div id="settings-modal" class="fixed inset-0 bg-black/50 hidden z-50 flex items-center justify-center p-4 backdrop-blur-sm transition-opacity">
-        <div class="bg-white rounded-2xl w-full max-w-md shadow-xl overflow-hidden animate-[fadeIn_0.2s_ease-out]">
-            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
-                <h2 class="text-xl font-semibold flex items-center gap-2">
-                    <i class="fa-solid fa-sliders text-blue-500"></i> Settings
-                </h2>
-                <button id="close-modal-btn" class="text-gray-400 hover:text-gray-600">
-                    <i class="fa-solid fa-xmark text-lg"></i>
-                </button>
-            </div>
-            
-            <div class="p-6 space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">OpenRouter API Key</label>
-                    <input type="password" id="api-key" placeholder="sk-or-..." class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
-                </div>
-                
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Model ID</label>
-                    <input type="text" id="model-id" placeholder="openrouter/free" value="openrouter/free" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-gray-50">
-                    <p class="text-xs text-green-600 mt-1 font-medium"><i class="fa-solid fa-check-circle"></i> Default: openrouter/free (ऑटो-राउटर, कभी फेल नहीं होगा)</p>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">System Prompt</label>
-                    <textarea id="system-prompt" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">You are a helpful AI assistant.</textarea>
-                </div>
-            </div>
-
-            <div class="px-6 py-4 bg-gray-50 flex justify-end gap-3 rounded-b-2xl">
-                <button id="cancel-btn" class="px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-lg font-medium transition-colors">Cancel</button>
-                <button id="save-btn" class="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors shadow-sm">Save Changes</button>
-            </div>
-        </div>
+  <main>
+    <textarea id="textInput" placeholder="यहाँ हिंदी या अंग्रेजी में टेक्स्ट लिखें..."></textarea>
+    <div class="meta-row">
+      <span id="charCount">0 अक्षर</span>
+      <span id="wordCount">0 शब्द</span>
     </div>
 
-    <script>
-        // DOM Elements
-        const chatContainer = document.getElementById('chat-container');
-        const chatForm = document.getElementById('chat-form');
-        const userInput = document.getElementById('user-input');
-        const settingsBtn = document.getElementById('settings-btn');
-        const settingsModal = document.getElementById('settings-modal');
-        const closeModalBtn = document.getElementById('close-modal-btn');
-        const cancelBtn = document.getElementById('cancel-btn');
-        const saveBtn = document.getElementById('save-btn');
-        
-        // Setting Inputs
-        const apiKeyInput = document.getElementById('api-key');
-        const modelIdInput = document.getElementById('model-id');
-        const systemPromptInput = document.getElementById('system-prompt');
+    <select id="backendSelect">
+      <option value="browser">🌐 ब्राउज़र (निःशुल्क, असीमित)</option>
+      <option value="openrouter">🌐 OpenRouter API</option>
+      <option value="google">🤖 Google Cloud TTS API</option>
+    </select>
 
-        // Chat History Array
-        let chatHistory = [];
+    <select id="voiceSelect">
+      <option value="auto">🎯 ऑटो (हिंदी प्राथमिकता)</option>
+    </select>
 
-        // Load Settings from LocalStorage on load
-        window.addEventListener('DOMContentLoaded', () => {
-            apiKeyInput.value = localStorage.getItem('or_api_key') || '';
-            // मॉडल अब हमेशा डिफ़ॉल्ट रूप से 'openrouter/free' रहेगा 
-            modelIdInput.value = localStorage.getItem('or_model_id') || 'openrouter/free';
-            systemPromptInput.value = localStorage.getItem('or_system_prompt') || 'You are a helpful AI assistant.';
-            
-            // Set initial system prompt in history
-            chatHistory.push({ role: "system", content: systemPromptInput.value });
-        });
+    <div class="slider-box">
+      <label>स्पीड:</label>
+      <input type="range" id="speedSlider" min="0.5" max="2.0" step="0.1" value="1.0">
+      <span id="speedValue">1.0x</span>
+    </div>
 
-        // Auto-resize textarea
-        userInput.addEventListener('input', function() {
-            this.style.height = 'auto';
-            this.style.height = (this.scrollHeight) + 'px';
-            if(this.value === '') this.style.height = 'auto';
-        });
+    <button class="btn" id="generateBtn" onclick="generateSpeech()">🎵 ऑडियो बनाएं</button>
 
-        // Enter key to send (Shift+Enter for new line)
-        userInput.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                chatForm.dispatchEvent(new Event('submit'));
-            }
-        });
+    <audio id="audioPlayer" controls style="display:none;"></audio>
+    <button class="btn download-btn" id="downloadBtn" onclick="downloadAudio()">⬇️ MP3 डाउनलोड करें</button>
+  </main>
 
-        // Modal Logic
-        const openModal = () => settingsModal.classList.remove('hidden');
-        const closeModal = () => settingsModal.classList.add('hidden');
+  <footer>© 2026 TTS App | मोबाइल ऑप्टिमाइज्ड</footer>
+</div>
 
-        settingsBtn.addEventListener('click', openModal);
-        closeModalBtn.addEventListener('click', closeModal);
-        cancelBtn.addEventListener('click', closeModal);
+<!-- Settings Modal -->
+<div class="modal" id="settingsModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>⚙️ API सेटिंग्स</h3>
+      <button class="close-btn" onclick="toggleSettings()">✕</button>
+    </div>
+    <div class="form-group">
+      <label>OpenRouter API Key</label>
+      <input type="password" id="orKey" placeholder="sk-or-...">
+      <div class="hint">OpenRouter से कॉपी करें। फ्री मॉडल: <code>openai/tts-1</code></div>
+    </div>
+    <div class="form-group">
+      <label>OpenRouter मॉडल नाम</label>
+      <input type="text" id="orModel" value="openai/tts-1" placeholder="openai/tts-1">    </div>
+    <hr style="border-color:#334155; margin:16px 0;">
+    <div class="form-group">
+      <label>Google Cloud TTS API Key</label>
+      <input type="password" id="googleKey" placeholder="AIza...">
+      <div class="hint">Google Cloud Console से TTS API Key बनाएं</div>
+    </div>
+    <button class="btn" onclick="saveSettings()">💾 सेव करें</button>
+  </div>
+</div>
 
-        // Save Settings
-        saveBtn.addEventListener('click', () => {
-            localStorage.setItem('or_api_key', apiKeyInput.value.trim());
-            localStorage.setItem('or_model_id', modelIdInput.value.trim());
-            localStorage.setItem('or_system_prompt', systemPromptInput.value.trim());
-            
-            // Update system prompt in history
-            if(chatHistory.length > 0 && chatHistory[0].role === 'system') {
-                chatHistory[0].content = systemPromptInput.value.trim();
-            } else {
-                chatHistory.unshift({ role: "system", content: systemPromptInput.value.trim() });
-            }
-            
-            closeModal();
-            // Settings save होने पर एक छोटा मैसेज 
-            const Toast = document.createElement('div');
-            Toast.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded shadow-lg transition-opacity duration-300';
-            Toast.innerText = 'Settings Saved!';
-            document.body.appendChild(Toast);
-            setTimeout(() => { Toast.style.opacity = '0'; setTimeout(() => Toast.remove(), 300); }, 2000);
-        });
+<div class="toast" id="toast">✅ हो गया!</div>
 
-        // Append Message to UI
-        function appendMessage(role, text) {
-            const msgDiv = document.createElement('div');
-            msgDiv.className = `flex ${role === 'user' ? 'justify-end' : 'justify-start'} message-enter`;
-            
-            const innerDiv = document.createElement('div');
-            if (role === 'user') {
-                innerDiv.className = 'bg-blue-600 text-white rounded-2xl rounded-tr-sm px-4 py-2 max-w-[85%] shadow-sm whitespace-pre-wrap';
-            } else {
-                innerDiv.className = 'bg-white border border-gray-200 text-gray-800 rounded-2xl rounded-tl-sm px-4 py-2 max-w-[85%] shadow-sm whitespace-pre-wrap';
-            }
-            
-            innerDiv.textContent = text;
-            msgDiv.appendChild(innerDiv);
-            chatContainer.appendChild(msgDiv);
-            chatContainer.scrollTop = chatContainer.scrollHeight;
-        }
+<script>
+  // --- Config & State ---
+  const els = {
+    text: document.getElementById('textInput'),
+    char: document.getElementById('charCount'),
+    word: document.getElementById('wordCount'),
+    backend: document.getElementById('backendSelect'),
+    voice: document.getElementById('voiceSelect'),
+    speed: document.getElementById('speedSlider'),
+    speedVal: document.getElementById('speedValue'),
+    btn: document.getElementById('generateBtn'),
+    audio: document.getElementById('audioPlayer'),
+    dlBtn: document.getElementById('downloadBtn'),
+    modal: document.getElementById('settingsModal'),
+    toast: document.getElementById('toast'),
+    orKey: document.getElementById('orKey'),
+    orModel: document.getElementById('orModel'),
+    gKey: document.getElementById('googleKey')
+  };
 
-        // Add loading indicator
-        function addLoader() {
-            const loaderDiv = document.createElement('div');
-            loaderDiv.id = 'loading-indicator';
-            loaderDiv.className = 'flex justify-start message-enter';
-            loaderDiv.innerHTML = `
-                <div class="bg-white border border-gray-200 rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm flex gap-1 items-center">
-                    <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                    <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
-                    <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.4s"></div>
-                </div>`;
-            chatContainer.appendChild(loaderDiv);
-            chatContainer.scrollTop = chatContainer.scrollHeight;
-        }
+  let audioBlobUrl = null;
+  let currentAudioBlob = null;
 
-        function removeLoader() {
-            const loader = document.getElementById('loading-indicator');
-            if (loader) loader.remove();
-        }
+  // --- Init ---
+  function init() {
+    // Load saved keys
+    els.orKey.value = localStorage.getItem('orKey') || '';
+    els.orModel.value = localStorage.getItem('orModel') || 'openai/tts-1';
+    els.gKey.value = localStorage.getItem('gKey') || '';
 
-        // Handle Chat Submit
-        chatForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const message = userInput.value.trim();
-            if (!message) return;
+    // Populate browser voices
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.onvoiceschanged = populateBrowserVoices;
+      populateBrowserVoices();
+    }
 
-            const apiKey = localStorage.getItem('or_api_key');
-            if (!apiKey) {
-                alert("Please add your OpenRouter API Key in Settings first.");
-                openModal();
-                return;
-            }
+    // Event Listeners    els.text.addEventListener('input', updateCounts);
+    els.speed.addEventListener('input', () => els.speedVal.textContent = els.speed.value + 'x');
+    els.backend.addEventListener('change', updateVoiceOptions);
+    
+    updateCounts();
+    showToast('🚀 ऐप तैयार है');
+  }
 
-            // UI Updates for User
-            appendMessage('user', message);
-            userInput.value = '';
-            userInput.style.height = 'auto';
-            addLoader();
+  function updateCounts() {
+    const txt = els.text.value;
+    els.char.textContent = `${txt.length} अक्षर`;
+    els.word.textContent = `${txt.trim() === '' ? 0 : txt.trim().split(/\s+/).length} शब्द`;
+  }
 
-            // Add to history
-            chatHistory.push({ role: "user", content: message });
+  function populateBrowserVoices() {
+    if (els.backend.value !== 'browser') return;
+    const voices = speechSynthesis.getVoices().filter(v => v.lang.startsWith('hi'));
+    els.voice.innerHTML = '<option value="auto">🎯 ऑटो (हिंदी प्राथमिकता)</option>';
+    voices.forEach((v, i) => {
+      els.voice.innerHTML += `<option value="${i}">🗣️ ${v.name}</option>`;
+    });
+  }
 
-            const modelId = localStorage.getItem('or_model_id') || 'openrouter/free';
+  function updateVoiceOptions() {
+    const backend = els.backend.value;
+    if (backend === 'browser') {
+      populateBrowserVoices();
+      els.dlBtn.style.display = 'none';
+      showToast('ℹ️ ब्राउज़र मोड में डाउनलोड उपलब्ध नहीं');
+    } else if (backend === 'openrouter') {
+      els.voice.innerHTML = '<option value="alloy">alloy</option><option value="echo">echo</option><option value="fable">fable</option><option value="onyx">onyx</option><option value="nova">nova</option><option value="shimmer">shimmer</option>';
+      els.dlBtn.style.display = 'block';
+    } else if (backend === 'google') {
+      els.voice.innerHTML = '<option value="hi-IN-Standard-A">हिंदी (Standard-A)</option><option value="hi-IN-Standard-B">हिंदी (Standard-B)</option><option value="hi-IN-Standard-C">हिंदी (Standard-C)</option><option value="hi-IN-Standard-D">हिंदी (Standard-D)</option>';
+      els.dlBtn.style.display = 'block';
+    }
+  }
 
-            try {
-                const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-                    method: "POST",
-                    headers: {
-                        "Authorization": `Bearer ${apiKey}`,
-                        "HTTP-Referer": window.location.href, // Required by OpenRouter
-                        "X-Title": "My AI Studio", // Optional
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        model: modelId,
-                        messages: chatHistory
-                    })
-                });
+  function toggleSettings() {
+    els.modal.classList.toggle('active');
+  }
 
-                removeLoader();
+  function saveSettings() {
+    localStorage.setItem('orKey', els.orKey.value.trim());
+    localStorage.setItem('orModel', els.orModel.value.trim());
+    localStorage.setItem('gKey', els.gKey.value.trim());
+    toggleSettings();
+    showToast('✅ सेटिंग्स सेव हो गईं');
+  }
+  function showToast(msg) {
+    els.toast.textContent = msg;
+    els.toast.classList.add('show');
+    setTimeout(() => els.toast.classList.remove('show'), 2000);
+  }
 
-                if (!response.ok) {
-                    const err = await response.json();
-                    throw new Error(err.error?.message || 'API Error');
-                }
+  // --- Core Logic ---
+  async function generateSpeech() {
+    const text = els.text.value.trim();
+    if (!text) return showToast('⚠️ कृपया टेक्स्ट डालें');
 
-                const data = await response.json();
-                const aiMessage = data.choices[0].message.content;
-                
-                appendMessage('ai', aiMessage);
-                chatHistory.push({ role: "assistant", content: aiMessage });
+    const backend = els.backend.value;
+    const speed = parseFloat(els.speed.value);
+    const voice = els.voice.value;
 
-            } catch (error) {
-                removeLoader();
-                appendMessage('ai', `❌ Error: ${error.message}`);
-                chatHistory.pop(); // Remove the last user message from history so it doesn't get stuck
-            }
-        });
-    </script>
+    els.btn.disabled = true;
+    els.btn.textContent = '⏳ बना रहे है...';
+
+    try {
+      if (backend === 'browser') {
+        speakBrowser(text, speed, voice);
+        els.dlBtn.style.display = 'none';
+        els.audio.style.display = 'none';
+      } else if (backend === 'openrouter') {
+        await fetchOpenRouter(text, speed, voice);
+      } else if (backend === 'google') {
+        await fetchGoogleTTS(text, speed, voice);
+      }
+      showToast('✅ ऑडियो तैयार!');
+    } catch (err) {
+      console.error(err);
+      showToast('❌ त्रुटि: ' + err.message);
+    } finally {
+      els.btn.disabled = false;
+      els.btn.textContent = '🎵 ऑडियो बनाएं';
+    }
+  }
+
+  // Browser TTS
+  function speakBrowser(text, speed, voiceIdx) {
+    window.speechSynthesis.cancel();
+    const utt = new SpeechSynthesisUtterance(text);
+    utt.rate = speed;
+    utt.lang = 'hi-IN';
+    if (voiceIdx !== 'auto') {
+      const voices = speechSynthesis.getVoices();
+      utt.voice = voices[parseInt(voiceIdx)] || voices[0];
+    }
+    speechSynthesis.speak(utt);
+  }
+  // OpenRouter TTS
+  async function fetchOpenRouter(text, speed, voice) {
+    const key = els.orKey.value.trim();
+    const model = els.orModel.value.trim();
+    if (!key) throw new Error('OpenRouter API Key डालें');
+
+    const res = await fetch('https://openrouter.ai/api/v1/audio/speech', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${key}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model, input: text, voice: voice, speed })
+    });
+    if (!res.ok) throw new Error(await res.text());
+    
+    const blob = await res.blob();
+    setupAudio(blob, 'tts.mp3');
+  }
+
+  // Google Cloud TTS
+  async function fetchGoogleTTS(text, speed, voice) {
+    const key = els.gKey.value.trim();
+    if (!key) throw new Error('Google API Key डालें');
+
+    const res = await fetch('https://texttospeech.googleapis.com/v1/text:synthesize', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        input: { text },
+        voice: { languageCode: 'hi-IN', name: voice },
+        audioConfig: { audioEncoding: 'MP3', speakingRate: speed }
+      })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error.message);
+
+    const binaryString = window.atob(data.audioContent);
+    const len = binaryString.length;
+    const bytes = new Uint8Array(len);
+    for (let i = 0; i < len; i++) bytes[i] = binaryString.charCodeAt(i);
+    const blob = new Blob([bytes], { type: 'audio/mp3' });
+    setupAudio(blob, 'google_tts.mp3');
+  }
+
+  function setupAudio(blob, filename) {
+    currentAudioBlob = { blob, filename };
+    if (audioBlobUrl) URL.revokeObjectURL(audioBlobUrl);
+    audioBlobUrl = URL.createObjectURL(blob);
+    els.audio.src = audioBlobUrl;
+    els.audio.style.display = 'block';
+    els.audio.play();    els.dlBtn.style.display = 'block';
+  }
+
+  function downloadAudio() {
+    if (!currentAudioBlob) return;
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(currentAudioBlob.blob);
+    a.download = currentAudioBlob.filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+
+  // Run
+  window.addEventListener('DOMContentLoaded', init);
+</script>
 </body>
 </html>
