@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Gemini TTS - Aryan News</title>
+    <title>Aryan News TTS Studio</title>
     <style>
         * { box-sizing: border-box; }
         body { font-family: 'Roboto', sans-serif; background: #f0f4f8; margin: 0; padding: 0; display: flex; justify-content: center; }
@@ -21,7 +21,7 @@
         button:active { opacity: 0.8; }
         button:disabled { background: #bdc1c6; cursor: not-allowed; }
         .loader { text-align: center; color: #4285f4; font-weight: bold; display: none; margin-bottom: 15px;}
-        .info-box { background: #e8f0fe; padding: 10px; border-radius: 8px; font-size: 12px; color: #1967d2; margin-top: 20px; border: 1px solid #d2e3fc; }
+        .info-box { background: #e8f0fe; padding: 10px; border-radius: 8px; font-size: 12px; color: #1967d2; margin-top: 20px; border: 1px solid #d2e3fc; text-align: center; }
     </style>
 </head>
 <body>
@@ -33,7 +33,7 @@
 
             <label>Gemini मॉडल:</label>
             <select id="modelSelect">
-                <option value="gemini-1.5-flash">Gemini 1.5 Flash (Best for Audio)</option>
+                <option value="gemini-1.5-flash">Gemini 1.5 Flash (Fast & Stable)</option>
                 <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
             </select>
 
@@ -42,27 +42,29 @@
                 <option value="Aoede">Aoede (Female)</option>
                 <option value="Puck">Puck (Male)</option>
                 <option value="Charon">Charon (Deep Male)</option>
+                <option value="Kore">Kore (Female Soft)</option>
             </select>
 
             <div id="loadingText" class="loader">ऑडियो बन रहा है, कृपया प्रतीक्षा करें...</div>
 
             <div class="btn-group">
-                <button id="playBtn" class="play-btn" onclick="generateAudio()">▶ Play</button>
-                <button id="dlBtn" class="dl-btn" onclick="downloadAudio()">⬇ Download</button>
+                <button id="playBtn" class="play-btn" onclick="generateAudio()">▶ Play Audio</button>
+                <button id="dlBtn" class="dl-btn" onclick="downloadAudio()">⬇ Download MP3</button>
             </div>
             
             <audio id="audioPlayer" controls style="width: 100%; margin-top: 20px; display: none;"></audio>
             
             <div class="info-box">
-                <b>Note:</b> API Backend is Connected.
+                <b>वेबसाइट अब Cloudflare पर पूरी तरह सुरक्षित है।</b>
             </div>
         </div>
     </div>
 
     <script>
         let currentBlob = null;
-        // URL में /api जोड़ दिया गया है
-        const API_URL = 'https://rantts.babu902654.workers.dev/api';
+        
+        // अब कोई बाहरी लिंक नहीं है, यह सीधे अपने सर्वर से डेटा लेगा
+        const API_URL = '/api';
 
         async function generateAudio() {
             const text = document.getElementById('textInput').value.trim();
@@ -99,11 +101,7 @@
                 player.play();
             } catch(e) {
                 console.error(e);
-                if (e.message === "Failed to fetch") {
-                    alert('एरर: आपका ब्राउज़र (Chrome) कनेक्शन ब्लॉक कर रहा है। कृपया इसे Incognito Mode (गुप्त टैब) में खोलकर चेक करें।');
-                } else {
-                    alert('एरर: ' + e.message);
-                }
+                alert('एरर आ गया: ' + e.message);
             } finally {
                 playBtn.disabled = false;
                 loader.style.display = 'none';
