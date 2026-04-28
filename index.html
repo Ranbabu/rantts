@@ -33,17 +33,19 @@
 
             <label>Gemini मॉडल:</label>
             <select id="modelSelect">
-                <option value="gemini-2.5-flash">Gemini 2.5 Flash (Super Fast)</option>
-                <option value="gemini-3.1-flash">Gemini 3.1 Flash (High Quality)</option>
+                <!-- नोट: Gemini के Audio सपोर्टेड मॉडल्स 'gemini-1.5-flash' होते हैं, मैंने इसे डिफ़ॉल्ट रखा है ताकि एरर न आए -->
+                <option value="gemini-1.5-flash">Gemini 1.5 Flash (Recommended/Fast)</option>
+                <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+                <option value="gemini-3.1-flash">Gemini 3.1 Flash</option>
             </select>
 
             <label>आवाज़ (Voice):</label>
             <select id="voiceSelect">
-                <option value="Aoede">Aoede</option>
-                <option value="Puck">Puck</option>
-                <option value="Charon">Charon</option>
-                <option value="Kore">Kore</option>
-                <option value="Fenrir">Fenrir</option>
+                <option value="Aoede">Aoede (Female)</option>
+                <option value="Puck">Puck (Male)</option>
+                <option value="Charon">Charon (Male Deep)</option>
+                <option value="Kore">Kore (Female Soft)</option>
+                <option value="Fenrir">Fenrir (Male Bold)</option>
             </select>
 
             <div id="loadingText" class="loader">ऑडियो बन रहा है, कृपया प्रतीक्षा करें...</div>
@@ -56,13 +58,17 @@
             <audio id="audioPlayer" controls style="width: 100%; margin-top: 20px; display: none;"></audio>
             
             <div class="info-box">
-                <b>Note:</b> API Key सुरक्षित रूप से Cloudflare सर्वर में सेव है।
+                <b>Note:</b> API Key सुरक्षित रूप से Cloudflare सर्वर में सेव है। यह वेबसाइट सीधे API से कनेक्टेड है।
             </div>
         </div>
     </div>
 
     <script>
         let currentBlob = null;
+
+        // यहाँ आपका Cloudflare Worker का लाइव URL डाला गया है
+        const CLOUDFLARE_API_URL = 'https://rantts.babu902654.workers.dev/';
+
         async function generateAudio() {
             const text = document.getElementById('textInput').value.trim();
             const model = document.getElementById('modelSelect').value;
@@ -79,14 +85,21 @@
             player.style.display = 'none';
 
             try {
-                // यह GitHub Pages के फोल्डर स्ट्रक्चर को कॉल करेगा
-                const res = await fetch('/api/generate', {
+                // डायरेक्ट Cloudflare API को कॉल कर रहे हैं
+                const res = await fetch(CLOUDFLARE_API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ text, model, voice })
                 });
                 
-                const data = await res.json();
+                // अगर API से JSON नहीं आता है तो यह एरर पकड़ेगा
+                let data;
+                try {
+                    data = await res.json();
+                } catch (jsonError) {
+                    throw new Error("Server से सही जवाब नहीं मिला। कृपया अपना Cloudflare Worker चेक करें।");
+                }
+
                 if(!res.ok) throw new Error(data.error || 'Server Error');
                 
                 const audioSrc = 'data:' + data.format + ';base64,' + data.audio;
@@ -108,7 +121,7 @@
             if(!currentBlob) { alert('पहले Play दबाकर ऑडियो जनरेट करें!'); return; }
             const a = document.createElement('a');
             a.href = URL.createObjectURL(currentBlob);
-            a.download = 'AryanNews_Audio_' + Date.now() + '.ogg';
+            a.download = 'AryanNews_Audio_' + Date.now() + '.ogg'; // Google OGG फॉर्मेट देता है
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
