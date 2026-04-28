@@ -1,19 +1,21 @@
 export default {
   async fetch(request, env) {
-    // CORS Headers: यह GitHub Pages को बिना ब्लॉक किए कनेक्ट होने देगा
+    // यह कोड ब्राउज़र को बताता है कि GitHub Pages को ब्लॉक न करें
     const corsHeaders = {
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type",
     };
 
-    // 1. ब्राउज़र की सिक्योरिटी चेकिंग (OPTIONS Request) को पास करने के लिए
+    // 1. ब्राउज़र की प्री-चेकिंग (OPTIONS) को पास करने के लिए
     if (request.method === "OPTIONS") {
-      return new Response(null, { headers: corsHeaders });
+      return new Response(null, { status: 200, headers: corsHeaders });
     }
 
-    // 2. जब वेबसाइट से Play बटन दबेगा (POST Request)
-    if (request.method === "POST") {
+    const url = new URL(request.url);
+
+    // 2. जब वेबसाइट से रिक्वेस्ट आएगी (सिर्फ /api पाथ पर)
+    if (request.method === "POST" && url.pathname.includes("/api")) {
       try {
         const body = await request.json();
         const { text, model, voice } = body;
@@ -21,7 +23,7 @@ export default {
         const apiKey = env.GEMINI_API_KEY;
 
         if (!apiKey) {
-          return new Response(JSON.stringify({ error: "Cloudflare में API Key नहीं है!" }), { 
+          return new Response(JSON.stringify({ error: "API Key Missing in Cloudflare" }), { 
             status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } 
           });
         }
@@ -33,9 +35,7 @@ export default {
           generationConfig: {
             responseModalities: ["AUDIO"],
             speechConfig: {
-              voiceConfig: {
-                prebuiltVoiceConfig: { voiceName: voice || "Aoede" }
-              }
+              voiceConfig: { prebuiltVoiceConfig: { voiceName: voice || "Aoede" } }
             }
           }
         };
@@ -54,7 +54,6 @@ export default {
 
         const audioBase64 = data.candidates[0].content.parts[0].inlineData.data;
         
-        // सफलता पूर्वक ऑडियो वापस भेजना
         return new Response(JSON.stringify({ audio: audioBase64, format: 'audio/ogg' }), {
           status: 200,
           headers: { "Content-Type": "application/json", ...corsHeaders }
@@ -67,8 +66,8 @@ export default {
       }
     }
     
-    // 3. अगर कोई डायरेक्ट लिंक खोलेगा तो यह दिखेगा
-    return new Response(JSON.stringify({ status: "API is Live & Running!" }), { 
+    // 3. कोई डायरेक्ट लिंक खोलेगा तो यह दिखेगा
+    return new Response(JSON.stringify({ status: "Aryan News Backend is Active" }), { 
         status: 200, headers: { "Content-Type": "application/json", ...corsHeaders }
     });
   }
